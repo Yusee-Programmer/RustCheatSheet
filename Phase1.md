@@ -1,0 +1,671 @@
+# 🦀 PHASE 1: BASICS (FOUNDATIONS) - COMPLETE CHEAT SHEET
+
+## 📚 Phase 1 Topics Overview
+
+1. Introduction to Rust
+2. Setting up Rust Environment
+3. Variables and Data Types
+4. Operators
+5. Control Flow
+6. Pattern Matching (match)
+7. Functions
+8. Arrays and Tuples
+9. Strings
+10. Slices
+11. Structs
+12. Enums
+
+---
+
+## 1️⃣ VARIABLES & DATA TYPES
+
+### Syntax Structure
+
+```rust
+// Variable declaration
+let name = value;
+let mut name = value;  // Mutable
+const NAME: type = value;  // Constant
+
+// Type annotations
+let name: type = value;
+let numbers: [i32; 5] = [1, 2, 3, 4, 5];
+
+// Shadowing
+let x = 5;
+let x = x + 1;  // New variable, can change type
+```
+
+### Important Keywords & Rules
+
+| Keyword | Purpose | Example |
+|---------|---------|---------|
+| let | Declare variable | `let x = 5;` |
+| mut | Make variable mutable | `let mut x = 5;` |
+| const | Declare constant | `const MAX: u32 = 100;` |
+
+#### Scalar Types:
+- **Integers**: i8, i16, i32, i64, i128, u8, u16, u32, u64, u128, isize, usize
+- **Floats**: f32, f64
+- **Boolean**: bool (true/false)
+- **Character**: char (Unicode, single quotes)
+
+#### Compound Types:
+- **Tuple**: (type1, type2) → `let tup = (1, "hello");`
+- **Array**: [type; length] → `let arr = [1, 2, 3];`
+
+### Rules to Memorize:
+- ✅ Variables are immutable by default
+- ✅ Constants must have explicit type annotation
+- ✅ Shadowing allows type change, mut does not
+- ✅ Arrays have fixed length, same type
+- ✅ Tuples can have mixed types, fixed length
+
+---
+
+## 2️⃣ OPERATORS
+
+### Syntax Structure
+
+```rust
+// Arithmetic
+let sum = a + b;
+let diff = a - b;
+let product = a * b;
+let quotient = a / b;
+let remainder = a % b;
+
+// Comparison
+let is_equal = a == b;
+let is_greater = a > b;
+
+// Logical
+let result = a && b;  // AND
+let result = a || b;  // OR
+let result = !a;      // NOT
+
+// Assignment
+a += 5;  // a = a + 5
+a *= 2;  // a = a * 2
+```
+
+### Operator Types
+
+| Category | Operators |
+|----------|-----------|
+| Arithmetic | +, -, *, /, % |
+| Comparison | ==, !=, <, >, <=, >= |
+| Logical | &&, \|\|, ! |
+| Assignment | =, +=, -=, *=, /=, %= |
+| Bitwise | &, \|, ^, <<, >>, ! |
+
+### Rules to Memorize:
+- ✅ Integer division truncates toward zero (e.g., 10 / 3 = 3)
+- ✅ Use floats for decimal division: 10.0 / 3.0
+- ✅ Logical operators short-circuit
+- ✅ Comparison operators return bool
+
+---
+
+## 3️⃣ CONTROL FLOW
+
+### Syntax Structure
+
+```rust
+// if/else
+if condition {
+    // code
+} else if other_condition {
+    // code
+} else {
+    // code
+}
+
+// if as expression
+let result = if condition { value1 } else { value2 };
+
+// loop
+loop {
+    break;  // Exit loop
+    break value;  // Return value from loop
+    continue;  // Skip to next iteration
+}
+
+// while
+while condition {
+    // code
+}
+
+// for
+for item in collection {
+    // code
+}
+for i in start..end {  // Exclusive end
+    // code
+}
+for i in start..=end {  // Inclusive end
+    // code
+}
+```
+
+### Important Keywords & Rules
+
+| Keyword | Purpose | Example |
+|---------|---------|---------|
+| if | Conditional execution | `if x > 5 { }` |
+| else | Alternative branch | `else { }` |
+| loop | Infinite loop | `loop { break; }` |
+| while | Condition loop | `while x < 10 { }` |
+| for | Iteration loop | `for i in 0..10 { }` |
+| break | Exit loop | `break;` or `break value;` |
+| continue | Skip iteration | `continue;` |
+
+### Rules to Memorize:
+- ✅ if conditions don't use parentheses ( )
+- ✅ if can be used as an expression returning a value
+- ✅ loop can return values with break value
+- ✅ for is the most common loop in Rust
+- ✅ Ranges: start..end (exclusive), start..=end (inclusive)
+
+---
+
+## 4️⃣ PATTERN MATCHING (match)
+
+### Syntax Structure
+
+```rust
+match value {
+    pattern1 => expression1,
+    pattern2 => expression2,
+    _ => default_expression,  // Catch-all
+}
+
+// With multiple patterns
+match value {
+    pattern1 | pattern2 => expression,
+    pattern3 => expression,
+}
+
+// With ranges
+match score {
+    90..=100 => "Excellent",
+    70..=89 => "Good",
+    _ => "Keep trying",
+}
+
+// Destructuring
+match tuple {
+    (x, y) => println!("({}, {})", x, y),
+}
+
+// With guards
+match number {
+    n if n % 2 == 0 => "Even",
+    _ => "Odd",
+}
+
+// if let (single pattern)
+if let pattern = value {
+    // code
+}
+
+// while let
+while let pattern = value {
+    // code
+}
+```
+
+### Important Keywords & Rules
+
+| Keyword | Purpose | Example |
+|---------|---------|---------|
+| match | Pattern matching | `match value { }` |
+| _ | Catch-all pattern | `_ => println!("other")` |
+| \| | OR in patterns | `1 \| 2 => "one or two"` |
+| ..= | Inclusive range | `1..=5` |
+| if let | Single pattern match | `if let Some(x) = value { }` |
+| while let | Loop with pattern | `while let Some(x) = iter.next() { }` |
+
+### Rules to Memorize:
+- ✅ match must be exhaustive (handle all cases)
+- ✅ Use _ as default/catch-all pattern
+- ✅ match is an expression, returns a value
+- ✅ if let is cleaner for matching one pattern
+- ✅ Match guards (if) add extra conditions
+
+---
+
+## 5️⃣ FUNCTIONS
+
+### Syntax Structure
+
+```rust
+// Basic function
+fn function_name() {
+    // code
+}
+
+// With parameters
+fn function_name(param1: type1, param2: type2) {
+    // code
+}
+
+// With return type
+fn function_name() -> return_type {
+    value  // No semicolon! (expression)
+}
+
+// Explicit return
+fn function_name() -> return_type {
+    return value;
+}
+
+// Multiple returns (tuple)
+fn function_name() -> (type1, type2) {
+    (value1, value2)
+}
+
+// Function with reference parameters
+fn function_name(param: &Type) {
+    // code
+}
+```
+
+### Important Keywords & Rules
+
+| Keyword | Purpose | Example |
+|---------|---------|---------|
+| fn | Declare function | `fn add(a: i32, b: i32) -> i32 { }` |
+| -> | Return type arrow | `-> i32` |
+| return | Explicit return | `return value;` |
+
+### Rules to Memorize:
+- ✅ main() is the entry point
+- ✅ Parameter types must be declared
+- ✅ Last expression is implicit return (no semicolon)
+- ✅ return keyword is optional (use for early returns)
+- ✅ Use () for no return (unit type)
+- ✅ Functions take ownership of parameters (unless borrowed)
+
+---
+
+## 6️⃣ ARRAYS & TUPLES
+
+### Syntax Structure
+
+```rust
+// Array
+let arr = [1, 2, 3, 4, 5];
+let arr: [i32; 5] = [1, 2, 3, 4, 5];
+let arr = [0; 10];  // Ten zeros
+let element = arr[index];
+let slice = &arr[start..end];
+
+// Tuple
+let tup = (1, "hello", true);
+let tup: (i32, &str, bool) = (1, "hello", true);
+let element = tup.0;  // Access by index
+let (a, b, c) = tup;  // Destructuring
+```
+
+### Important Rules
+
+| Concept | Array | Tuple |
+|---------|-------|-------|
+| Length | Fixed | Fixed |
+| Types | Same type | Can be different |
+| Access | `arr[index]` | `tup.index` |
+| Use case | Homogeneous data | Heterogeneous data |
+
+### Rules to Memorize:
+- ✅ Arrays: same type, fixed size, stack allocated
+- ✅ Tuples: mixed types, fixed size
+- ✅ Array indexing uses [ ], tuple indexing uses .
+- ✅ Tuple destructuring: `let (x, y) = tup;`
+- ✅ Use `{:?}` to print arrays/tuples (Debug trait)
+
+---
+
+## 7️⃣ STRINGS
+
+### Syntax Structure
+
+```rust
+// String (owned, heap-allocated)
+let s = String::from("hello");
+let s = "hello".to_string();
+let mut s = String::new();
+s.push_str("hello");
+s.push('!');
+
+// String slice (borrowed, immutable)
+let s: &str = "hello";
+let slice = &string[start..end];
+
+// Concatenation
+let s3 = s1 + &s2;  // s1 moved, s2 borrowed
+let s = format!("{}-{}", s1, s2);  // No ownership transfer
+
+// Iteration
+for c in s.chars() { }  // Characters
+for b in s.bytes() { }  // Bytes
+```
+
+### Important Keywords & Rules
+
+| Type | Description | Example |
+|------|-------------|---------|
+| String | Owned, heap, mutable | `String::from("hello")` |
+| &str | Borrowed, immutable view | `"hello"`, `&s[0..5]` |
+
+### Rules to Memorize:
+- ✅ String = owned, heap-allocated, mutable
+- ✅ &str = borrowed, immutable view
+- ✅ Cannot index strings (s[0]) — UTF-8 safety!
+- ✅ Use chars() to iterate over Unicode characters
+- ✅ format! macro doesn't take ownership
+- ✅ + operator moves first operand, borrows second
+
+---
+
+## 8️⃣ SLICES
+
+### Syntax Structure
+
+```rust
+// String slice
+let slice = &string[start..end];
+let slice = &string[..end];   // From start
+let slice = &string[start..]; // To end
+let slice = &string[..];      // Entire string
+
+// Array slice
+let arr = [1, 2, 3, 4, 5];
+let slice = &arr[1..4];  // Type: &[i32]
+let slice = &mut arr[..];  // Mutable slice
+
+// Function accepting slices
+fn process(slice: &[i32]) { }
+fn process_str(s: &str) { }  // &str is a string slice
+```
+
+### Important Rules
+
+| Concept | Syntax | Type |
+|---------|--------|------|
+| String slice | `&s[start..end]` | `&str` |
+| Array slice | `&arr[start..end]` | `&[T]` |
+
+### Rules to Memorize:
+- ✅ Slices are references (no ownership)
+- ✅ Range syntax: [start..end] (exclusive end)
+- ✅ Use .. for start/end: `[..5]`, `[5..]`, `[..]`
+- ✅ Cannot modify original while slice exists (borrowing rules)
+- ✅ Best practice: Use `&str` over `&String` in function parameters
+
+---
+
+## 9️⃣ STRUCTS
+
+### Syntax Structure
+
+```rust
+// Define struct
+struct Name {
+    field1: Type1,
+    field2: Type2,
+}
+
+// Create instance
+let instance = Name {
+    field1: value1,
+    field2: value2,
+};
+
+// Mutable instance
+let mut instance = Name { field1: value1, field2: value2 };
+instance.field1 = new_value;
+
+// Field init shorthand
+fn build(field1: Type1, field2: Type2) -> Name {
+    Name { field1, field2 }  // Same as field1: field1
+}
+
+// Update syntax
+let instance2 = Name {
+    field1: new_value,
+    ..instance1  // Use remaining fields from instance1
+};
+
+// Tuple struct
+struct Color(i32, i32, i32);
+let black = Color(0, 0, 0);
+let red = black.0;  // Access by index
+
+// Unit struct
+struct AlwaysEqual;
+let subject = AlwaysEqual;
+
+// Methods
+impl Name {
+    fn method(&self) -> ReturnType {
+        // code
+    }
+    
+    fn mut_method(&mut self) {
+        // code
+    }
+    
+    fn associated_function() -> Self {
+        Name { field1: value1, field2: value2 }
+    }
+}
+```
+
+### Important Keywords & Rules
+
+| Concept | Syntax | Description |
+|---------|--------|-------------|
+| Struct definition | `struct Name { fields }` | Define custom type |
+| impl | `impl Name { }` | Implementation block |
+| &self | `fn method(&self)` | Immutable borrow method |
+| &mut self | `fn method(&mut self)` | Mutable borrow method |
+| self | `fn method(self)` | Take ownership |
+| #[derive(Debug)] | `#[derive(Debug)]` | Enable debug printing |
+
+### Rules to Memorize:
+- ✅ Struct fields are private by default
+- ✅ Entire struct must be mut to modify fields
+- ✅ .. update syntax moves fields (watch ownership!)
+- ✅ Methods use &self, &mut self, or self
+- ✅ Associated functions (no self) are constructors
+- ✅ Use #[derive(Debug)] to print structs with `{:?}`
+
+---
+
+## 🔟 ENUMS
+
+### Syntax Structure
+
+```rust
+// Simple enum
+enum Name {
+    Variant1,
+    Variant2,
+    Variant3,
+}
+
+// Enum with data
+enum Name {
+    Variant1,
+    Variant2(Type1, Type2),  // Tuple variant
+    Variant3 { field1: Type1 },  // Struct variant
+}
+
+// Create instances
+let value = Name::Variant1;
+let value = Name::Variant2(value1, value2);
+let value = Name::Variant3 { field1: value1 };
+
+// Match on enum
+match value {
+    Name::Variant1 => { }
+    Name::Variant2(a, b) => { }
+    Name::Variant3 { field1 } => { }
+}
+
+// Option<T> enum
+let some = Some(value);
+let none: Option<Type> = None;
+
+// Methods on enums
+impl Name {
+    fn method(&self) -> ReturnType {
+        match self {
+            Name::Variant1 => { }
+            // ...
+        }
+    }
+}
+```
+
+### Important Keywords & Rules
+
+| Concept | Syntax | Example |
+|---------|--------|---------|
+| Enum variant | Variant | `Option::Some` |
+| Option<T> | `Some(T)` or `None` | `Some(5)`, `None` |
+| if let | `if let pattern = value` | `if let Some(x) = value` |
+
+#### Built-in Enums:
+
+```rust
+enum Option<T> {
+    Some(T),
+    None,
+}
+
+enum Result<T, E> {
+    Ok(T),
+    Err(E),
+}
+```
+
+### Rules to Memorize:
+- ✅ Enums can store different types in different variants
+- ✅ match must handle all variants (exhaustive)
+- ✅ Use if let for single variant matching
+- ✅ Option<T> replaces null values
+- ✅ Result<T, E> for error handling
+- ✅ Enum variants are namespaced under enum name
+
+---
+
+## 🎯 CRITICAL RULES TO MEMORIZE
+
+### Ownership Rules (Preview for Phase 2)
+1. Each value has one owner
+2. Only one owner at a time
+3. Value is dropped when owner goes out of scope
+
+### Borrowing Rules
+1. Multiple immutable references allowed (`&T`)
+2. Only one mutable reference allowed (`&mut T`)
+3. Cannot mix mutable and immutable references
+
+### Variable Rules
+1. Variables are immutable by default
+2. Use mut for mutable variables
+3. Shadowing allows type change, mut does not
+
+### Function Rules
+1. Parameter types must be declared
+2. Last expression is implicit return
+3. Use return for early exit
+
+### String Rules
+1. String = owned, heap, mutable
+2. &str = borrowed, immutable view
+3. Cannot index strings (s[0])
+4. Use chars() for Unicode iteration
+
+### Slice Rules
+1. Slices are references (no ownership)
+2. Range syntax: [start..end] (exclusive)
+3. Cannot modify original while slice exists
+
+### Match Rules
+1. Must be exhaustive (handle all cases)
+2. _ is catch-all pattern
+3. match is an expression (returns value)
+
+---
+
+## 📝 QUICK REFERENCE CARD
+
+### Common Patterns
+
+```rust
+// Iterate over range
+for i in 0..10 { }
+
+// Match with Option
+match optional {
+    Some(value) => { }
+    None => { }
+}
+
+// if let pattern
+if let Some(x) = value { }
+
+// Create mutable string
+let mut s = String::from("hello");
+s.push_str(" world");
+
+// Define struct with methods
+#[derive(Debug)]
+struct Point { x: i32, y: i32 }
+impl Point {
+    fn new(x: i32, y: i32) -> Self { Self { x, y } }
+    fn distance(&self) -> f64 { ((self.x.pow(2) + self.y.pow(2)) as f64).sqrt() }
+}
+
+// Enum with match
+enum Status { Active, Inactive(u32), Error(String) }
+match status {
+    Status::Active => { }
+    Status::Inactive(code) => { }
+    Status::Error(msg) => { }
+}
+```
+
+### Debugging Helpers
+
+```rust
+println!("{}", value);       // Display trait
+println!("{:?}", value);     // Debug trait (single line)
+println!("{:#?}", value);    // Debug trait (pretty print)
+
+#[derive(Debug)]  // Add to structs/enums for debug printing
+```
+
+---
+
+## ✅ PHASE 1 COMPLETE - CHECKLIST
+
+You should now understand and be able to use:
+- Variables (let, mut, shadowing)
+- Data types (integers, floats, bool, char)
+- Operators (arithmetic, comparison, logical)
+- Control flow (if, loop, while, for)
+- Pattern matching (match, if let)
+- Functions (parameters, return values, expressions)
+- Arrays and tuples
+- Strings (String vs &str, methods)
+- Slices (syntax, ranges, borrowing)
+- Structs (definition, methods, update syntax)
+- Enums (variants, data, Option<T>)
+
+---
+
+## 🎉 Congratulations on Completing Phase 1! 🎉
