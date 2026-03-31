@@ -1,0 +1,685 @@
+# 🦀 PHASE 3: DATA STRUCTURES AND ERROR HANDLING - COMPLETE CHEAT SHEET
+
+## 📚 Phase 3 Topics Overview
+
+1. Vectors (Vec<T>)
+2. HashMaps (HashMap<K, V>)
+3. Strings (String and &str)
+4. Error Handling (Result, Option, ?)
+5. Custom Data Structures
+6. Implementing Methods
+
+---
+
+## 1️⃣ VECTORS (Vec<T>)
+
+### Creation Methods
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `vec![]` | Macro with values | `vec![1, 2, 3]` |
+| `Vec::new()` | Empty vector | `Vec::<i32>::new()` |
+| `Vec::with_capacity(n)` | Pre-allocate space | `Vec::with_capacity(100)` |
+| `from_iter()` | From iterator | `(0..5).collect()` |
+
+### Core Methods
+
+```rust
+let mut v = vec![1, 2, 3, 4, 5];
+```
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `push(item)` | Add to end | `v.push(6);` |
+| `pop()` | Remove & return last | `let last = v.pop();` |
+| `insert(index, item)` | Insert at index | `v.insert(0, 0);` |
+| `remove(index)` | Remove at index | `let item = v.remove(2);` |
+| `swap_remove(index)` | Remove & swap with last | `v.swap_remove(0);` |
+| `clear()` | Remove all | `v.clear();` |
+| `truncate(len)` | Keep first len | `v.truncate(3);` |
+| `resize(new_len, value)` | Change size | `v.resize(10, 0);` |
+| `retain(predicate)` | Keep matching | `v.retain(\|&x\| x > 3);` |
+| `dedup()` | Remove consecutive dupes | `v.dedup();` |
+| `append(&mut other)` | Move all from other | `v.append(&mut v2);` |
+| `split_off(at)` | Split at index | `let v2 = v.split_off(2);` |
+
+### Access Methods
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `get(index)` | `Option<&T>` | Safe access |
+| `get_mut(index)` | `Option<&mut T>` | Safe mutable access |
+| `first()` | `Option<&T>` | First element |
+| `last()` | `Option<&T>` | Last element |
+| `first_mut()` | `Option<&mut T>` | First mutable |
+| `last_mut()` | `Option<&mut T>` | Last mutable |
+| `as_slice()` | `&[T]` | As slice |
+| `as_mut_slice()` | `&mut [T]` | As mutable slice |
+
+### Info Methods
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `len()` | `usize` | Number of elements |
+| `is_empty()` | `bool` | Check if empty |
+| `capacity()` | `usize` | Allocated capacity |
+| `contains(&item)` | `bool` | Check contains |
+| `starts_with(slice)` | `bool` | Check prefix |
+| `ends_with(slice)` | `bool` | Check suffix |
+
+### Iteration
+
+```rust
+// By value (consumes)
+for item in v { }
+
+// By immutable reference
+for item in &v { }
+
+// By mutable reference
+for item in &mut v { *item *= 2; }
+
+// With index
+for (i, item) in v.iter().enumerate() { }
+
+// Iterator methods
+v.iter().map(|x| x * 2).collect::<Vec<_>>()
+v.iter().filter(|&&x| x > 5).collect()
+v.iter().any(|&x| x == 3)
+v.iter().all(|&x| x > 0)
+v.iter().find(|&&x| x == 5)
+v.iter().fold(0, |acc, &x| acc + x)
+v.iter().sum::<i32>()
+v.iter().max()
+v.iter().min()
+```
+
+### Sorting and Ordering
+
+| Method | Description |
+|--------|-------------|
+| `sort()` | Sort in place |
+| `sort_by(key)` | Sort with comparator |
+| `sort_by_key(key)` | Sort by key |
+| `reverse()` | Reverse in place |
+| `rotate_left(n)` | Rotate left |
+| `rotate_right(n)` | Rotate right |
+
+---
+
+## 2️⃣ HASHMAPS (HashMap<K, V>)
+
+### Creation Methods
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `HashMap::new()` | Empty map | `HashMap::new()` |
+| `HashMap::with_capacity(n)` | Pre-allocate | `HashMap::with_capacity(100)` |
+| `HashMap::from([(k,v)])` | From array | `HashMap::from([("a",1)])` |
+| `collect()` | From iterator | `vec![("a",1)].into_iter().collect()` |
+
+### Core Methods
+
+```rust
+use std::collections::HashMap;
+let mut map = HashMap::new();
+map.insert("key".to_string(), 10);
+```
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `insert(key, value)` | Insert or update | `map.insert("b", 20);` |
+| `get(&key)` | `Option<&V>` | `map.get("a")` |
+| `get_mut(&key)` | `Option<&mut V>` | `map.get_mut("a")` |
+| `remove(&key)` | `Option<V>` | `map.remove("a")` |
+| `clear()` | Remove all | `map.clear();` |
+| `retain(predicate)` | Keep matching | `map.retain(\|_, v\| *v > 5);` |
+
+### Entry API (Powerful!)
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `entry(key)` | Get entry | `map.entry(key)` |
+| `.or_insert(value)` | Insert default | `map.entry(k).or_insert(0)` |
+| `.or_insert_with(f)` | Lazy insert | `map.entry(k).or_insert_with(\|\| 42)` |
+| `.or_default()` | Insert default | `map.entry(k).or_default()` |
+| `.and_modify(f)` | Modify if exists | `map.entry(k).and_modify(\|v\| *v += 1)` |
+| `.or_insert_with(f)` | Chain all | `map.entry(k).and_modify(\|v\| *v += 1).or_insert(0)` |
+
+### Counting Pattern
+
+```rust
+for item in collection {
+    *map.entry(item).or_insert(0) += 1;
+}
+```
+
+### Info Methods
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `len()` | `usize` | Number of entries |
+| `is_empty()` | `bool` | Check if empty |
+| `contains_key(&key)` | `bool` | Check key exists |
+| `capacity()` | `usize` | Allocated capacity |
+
+### Iteration
+
+```rust
+// Key-value pairs
+for (key, value) in &map { }
+
+// Keys only
+for key in map.keys() { }
+
+// Values only
+for value in map.values() { }
+
+// Mutable values
+for value in map.values_mut() { *value *= 2; }
+
+// Consume
+for (key, value) in map { }
+
+// Collect keys/values
+let keys: Vec<&K> = map.keys().collect();
+let values: Vec<&V> = map.values().collect();
+```
+
+---
+
+## 3️⃣ STRINGS (String and &str)
+
+### Creation
+
+```rust
+// String (owned, heap)
+let s = String::new();
+let s = String::from("hello");
+let s = "hello".to_string();
+let s = "hello".to_owned();
+let s = format!("{} {}", "hello", "world");
+
+// &str (borrowed)
+let s: &str = "hello";
+let s: &str = &string;
+let s: &str = &string[0..5];
+```
+
+### String Manipulation
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `push(c)` | Add char | `s.push('!');` |
+| `push_str(str)` | Add string | `s.push_str(" world");` |
+| `insert(pos, c)` | Insert char | `s.insert(5, ' ');` |
+| `insert_str(pos, str)` | Insert string | `s.insert_str(0, "Hello ");` |
+| `pop()` | `Option<char>` | `let c = s.pop();` |
+| `remove(pos)` | Remove char | `let c = s.remove(5);` |
+| `truncate(len)` | Truncate to len | `s.truncate(5);` |
+| `clear()` | Empty string | `s.clear();` |
+
+### Concatenation
+
+```rust
+// + operator (moves first)
+let s3 = s1 + &s2;
+
+// format! macro (no move)
+let s = format!("{} {}", s1, s2);
+
+// join for vectors
+let s = vec!["a", "b", "c"].join(", ");
+```
+
+### Access and Substrings
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `len()` | `usize` | Length in bytes |
+| `is_empty()` | `bool` | Check empty |
+| `chars()` | `Chars` | Iterator over chars |
+| `bytes()` | `Bytes` | Iterator over bytes |
+| `as_bytes()` | `&[u8]` | As byte slice |
+| `as_str()` | `&str` | As string slice |
+| `get(i..j)` | `Option<&str>` | Safe slice |
+| `get_mut(i..j)` | `Option<&mut str>` | Mutable slice |
+
+### Searching
+
+| Method | Return | Description |
+|--------|--------|-------------|
+| `contains(pattern)` | `bool` | Check contains |
+| `starts_with(pattern)` | `bool` | Check prefix |
+| `ends_with(pattern)` | `bool` | Check suffix |
+| `find(pattern)` | `Option<usize>` | First match index |
+| `rfind(pattern)` | `Option<usize>` | Last match index |
+| `match_indices(pattern)` | `Iterator` | Matches with indices |
+
+### Splitting
+
+| Method | Description |
+|--------|-------------|
+| `split(delimiter)` | Split by delimiter |
+| `split_whitespace()` | Split by whitespace |
+| `splitn(n, delimiter)` | Split n times |
+| `rsplitn(n, delimiter)` | Split from right |
+| `lines()` | Split by line breaks |
+
+### Replacing and Trimming
+
+| Method | Description |
+|--------|-------------|
+| `replace(from, to)` | Replace all occurrences |
+| `replacen(from, to, n)` | Replace n occurrences |
+| `trim()` | Trim whitespace both ends |
+| `trim_start()` | Trim leading whitespace |
+| `trim_end()` | Trim trailing whitespace |
+| `to_lowercase()` | Convert to lowercase |
+| `to_uppercase()` | Convert to uppercase |
+
+### Character/Byte Access
+
+```rust
+// Iterate over characters
+for c in s.chars() { }
+
+// Iterate over bytes
+for b in s.bytes() { }
+
+// Get nth character (safe)
+let nth = s.chars().nth(5);
+
+// Convert to Vec<char>
+let chars: Vec<char> = s.chars().collect();
+```
+
+### Conversion
+
+```rust
+// &str → String
+let s = "hello".to_string();
+let s = String::from("hello");
+
+// String → &str
+let slice = &s;
+let slice = s.as_str();
+let slice = &s[..];
+
+// String → Vec<u8>
+let bytes = s.into_bytes();
+
+// Vec<u8> → String
+let s = String::from_utf8(bytes).unwrap();
+```
+
+---
+
+## 4️⃣ ERROR HANDLING (Result, Option, ?)
+
+### Result<T, E> Methods
+
+```rust
+let result: Result<i32, &str> = Ok(42);
+let err: Result<i32, &str> = Err("error");
+```
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `is_ok()` | Check if Ok | `result.is_ok()` |
+| `is_err()` | Check if Err | `result.is_err()` |
+| `ok()` | `Option<T>` | `result.ok()` |
+| `err()` | `Option<E>` | `result.err()` |
+| `unwrap()` | Get value or panic | `result.unwrap()` |
+| `unwrap_or(default)` | Get value or default | `result.unwrap_or(0)` |
+| `unwrap_or_else(f)` | Get value or compute | `result.unwrap_or_else(\|\| 42)` |
+| `expect(msg)` | Unwrap with custom message | `result.expect("Failed")` |
+| `map(f)` | Transform Ok | `result.map(\|x\| x * 2)` |
+| `map_err(f)` | Transform Err | `result.map_err(\|e\| format!("{}", e))` |
+| `and_then(f)` | Chain operations | `result.and_then(\|x\| Ok(x * 2))` |
+| `or(other)` | Return first Ok | `result.or(Ok(10))` |
+| `or_else(f)` | Lazy or | `result.or_else(\|\| Ok(42))` |
+
+### Option<T> Methods
+
+```rust
+let some: Option<i32> = Some(42);
+let none: Option<i32> = None;
+```
+
+| Method | Description | Example |
+|--------|-------------|---------|
+| `is_some()` | Check if Some | `some.is_some()` |
+| `is_none()` | Check if None | `none.is_none()` |
+| `unwrap()` | Get value or panic | `some.unwrap()` |
+| `unwrap_or(default)` | Get value or default | `some.unwrap_or(0)` |
+| `unwrap_or_else(f)` | Get value or compute | `some.unwrap_or_else(\|\| 42)` |
+| `expect(msg)` | Unwrap with message | `some.expect("No value")` |
+| `map(f)` | Transform Some | `some.map(\|x\| x * 2)` |
+| `and_then(f)` | Chain operations | `some.and_then(\|x\| Some(x * 2))` |
+| `or(other)` | Return first Some | `none.or(Some(10))` |
+| `or_else(f)` | Lazy or | `none.or_else(\|\| Some(42))` |
+| `ok_or(err)` | Option → Result | `some.ok_or("error")` |
+| `ok_or_else(f)` | Lazy error | `some.ok_or_else(\|\| "error")` |
+| `transpose()` | Option<Result> ↔ Result<Option> | `some.transpose()` |
+
+### ? Operator
+
+```rust
+// Propagates errors
+fn read_file() -> Result<String, io::Error> {
+    let mut s = String::new();
+    File::open("file.txt")?.read_to_string(&mut s)?;
+    Ok(s)
+}
+
+// With Option
+fn first_char(s: &str) -> Option<char> {
+    s.chars().next()?
+}
+```
+
+### Converting Between Result and Option
+
+```rust
+// Result → Option
+let opt = result.ok();
+
+// Option → Result
+let res = option.ok_or("error");
+
+// Transpose
+let result_option: Result<Option<i32>, E> = option_result.transpose();
+```
+
+---
+
+## 5️⃣ CUSTOM DATA STRUCTURES
+
+### Stack Implementation
+
+```rust
+struct Stack<T> {
+    elements: Vec<T>,
+}
+
+impl<T> Stack<T> {
+    fn new() -> Self { Stack { elements: Vec::new() } }
+    fn push(&mut self, item: T) { self.elements.push(item); }
+    fn pop(&mut self) -> Option<T> { self.elements.pop() }
+    fn peek(&self) -> Option<&T> { self.elements.last() }
+    fn len(&self) -> usize { self.elements.len() }
+    fn is_empty(&self) -> bool { self.elements.is_empty() }
+}
+```
+
+### Linked List Node Pattern
+
+```rust
+struct Node<T> {
+    value: T,
+    next: Option<Box<Node<T>>>,
+}
+
+struct LinkedList<T> {
+    head: Option<Box<Node<T>>>,
+    size: usize,
+}
+```
+
+### Binary Search Tree Pattern
+
+```rust
+struct BSTNode<T> {
+    value: T,
+    left: Option<Box<BSTNode<T>>>,
+    right: Option<Box<BSTNode<T>>>,
+}
+
+impl<T: Ord> BinarySearchTree<T> {
+    fn insert(&mut self, value: T) -> bool { }
+    fn contains(&self, value: &T) -> bool { }
+}
+```
+
+### Circular Buffer Pattern
+
+```rust
+struct CircularBuffer<T> {
+    data: Vec<Option<T>>,
+    capacity: usize,
+    head: usize,
+    tail: usize,
+    size: usize,
+}
+```
+
+---
+
+## 6️⃣ METHOD PATTERNS
+
+### Builder Pattern
+
+```rust
+#[derive(Debug)]
+struct Config {
+    host: String,
+    port: u16,
+}
+
+struct ConfigBuilder {
+    host: String,
+    port: u16,
+}
+
+impl ConfigBuilder {
+    fn new(host: &str) -> Self {
+        ConfigBuilder {
+            host: host.to_string(),
+            port: 8080,  // default
+        }
+    }
+    
+    fn port(mut self, port: u16) -> Self {
+        self.port = port;
+        self
+    }
+    
+    fn build(self) -> Config {
+        Config {
+            host: self.host,
+            port: self.port,
+        }
+    }
+}
+
+// Usage: ConfigBuilder::new("localhost").port(3000).build()
+```
+
+### Fluent Interface
+
+```rust
+impl Calculator {
+    fn add(mut self, x: i32) -> Self {
+        self.value += x;
+        self
+    }
+    
+    fn multiply(mut self, x: i32) -> Self {
+        self.value *= x;
+        self
+    }
+    
+    fn result(self) -> i32 {
+        self.value
+    }
+}
+```
+
+### Associated Types
+
+```rust
+trait Collection {
+    type Item;
+    type Iter<'a>: Iterator<Item = &'a Self::Item> where Self: 'a;
+    
+    fn add(&mut self, item: Self::Item);
+    fn iter(&self) -> Self::Iter<'_>;
+}
+```
+
+### Generic Methods with Trait Bounds
+
+```rust
+fn process<T, F>(data: &[T], f: F) -> Vec<T::Output>
+where
+    T: Clone,
+    F: Fn(&T) -> T::Output,
+    T::Output: Clone,
+{
+    data.iter().map(f).collect()
+}
+```
+
+### Multiple Constructors
+
+```rust
+impl Point {
+    fn origin() -> Self { Point { x: 0.0, y: 0.0 } }
+    fn new(x: f64, y: f64) -> Self { Point { x, y } }
+    fn from_polar(r: f64, theta: f64) -> Self { /* ... */ }
+}
+```
+
+### Conversion Traits
+
+```rust
+impl From<&str> for Point {
+    fn from(s: &str) -> Self {
+        // parse string to Point
+    }
+}
+
+// Enables: let p: Point = "1.0,2.0".into();
+```
+
+---
+
+## 🎯 QUICK REFERENCE CARD
+
+### Common Patterns
+
+```rust
+// Counting with HashMap
+let mut counts = HashMap::new();
+for item in collection {
+    *counts.entry(item).or_insert(0) += 1;
+}
+
+// Safe vector access
+if let Some(value) = vec.get(index) {
+    println!("{}", value);
+}
+
+// String concatenation
+let result = format!("{} {} {}", part1, part2, part3);
+
+// Error propagation
+fn process() -> Result<T, E> {
+    let value = fallible_operation()?;
+    another_operation(value)?
+}
+
+// Iterator chain
+let result: Vec<_> = collection
+    .iter()
+    .filter(|&x| x > 5)
+    .map(|x| x * 2)
+    .collect();
+
+// Builder pattern
+let config = ConfigBuilder::new("localhost")
+    .port(3000)
+    .timeout(60)
+    .build();
+```
+
+### Performance Tips
+
+| Operation | Complexity |
+|-----------|------------|
+| Vector push (amortized) | O(1) |
+| Vector insert at beginning | O(n) |
+| HashMap insert/lookup | O(1) avg |
+| String concatenation with + | O(n) |
+| String concatenation with format! | O(n) |
+| String push | O(1) amortized |
+
+### When to Use What
+
+| Need | Use |
+|------|-----|
+| Dynamic array | `Vec<T>` |
+| Key-value store | `HashMap<K, V>` |
+| String data | `String` or `&str` |
+| Recoverable error | `Result<T, E>` |
+| Optional value | `Option<T>` |
+| Error propagation | `?` operator |
+| Complex construction | Builder pattern |
+| Fluent API | Method chaining |
+
+---
+
+## ✅ PHASE 3 COMPLETE - CHECKLIST
+
+You should now understand and be able to use:
+
+### Vectors
+- Creation (vec!, new(), with_capacity())
+- Methods (push, pop, insert, remove)
+- Access (get, first, last)
+- Iteration (by value, ref, mutable ref)
+- Iterator methods (map, filter, collect)
+- Sorting (sort, reverse)
+
+### HashMaps
+- Creation (new, from, collect)
+- Methods (insert, get, remove)
+- Entry API (or_insert, and_modify)
+- Iteration (keys, values, iter)
+- Counting pattern
+
+### Strings
+- String vs &str distinction
+- Creation and manipulation
+- Slicing and indexing (safe)
+- UTF-8 handling (chars, bytes)
+- Searching and splitting
+- Concatenation (+, format!, join)
+
+### Error Handling
+- Result<T, E> methods
+- Option<T> methods
+- ? operator for propagation
+- unwrap vs expect vs safe handling
+- Custom error types
+- Converting between Result and Option
+
+### Custom Data Structures
+- Stack implementation
+- Linked list with Option<Box<T>>
+- Binary search tree with recursion
+- Circular buffer
+- Iterator implementation
+
+### Method Patterns
+- Builder pattern
+- Fluent interfaces
+- Associated types
+- Generic methods with bounds
+- Multiple constructors
+- Conversion traits (From, Into)
+
+---
+
+## 🎉 Congratulations on Completing Phase 3! 🎉
