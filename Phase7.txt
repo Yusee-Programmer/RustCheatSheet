@@ -1,0 +1,2075 @@
+🦀 PHASE 7: PRODUCTION RUST - COMPLETE DETAILED CHEAT SHEET
+Table of Contents
+
+    Rust Best Practices
+
+    Code Organization
+
+    Performance Optimization
+
+    Real-World Project Architecture
+
+1️⃣ RUST BEST PRACTICES
+📖 What is it?
+
+Rust best practices are conventions and patterns that make code idiomatic, maintainable, and performant. Following these practices ensures your code is readable, consistent, and follows the Rust community's collective wisdom.
+🎯 When to Apply Best Practices
+
+    Always: In all Rust code you write, regardless of project size
+
+    Code reviews: When reviewing others' code to maintain consistency
+
+    Library design: When creating public APIs that others will use
+
+    Onboarding: When teaching Rust to new team members
+
+    Refactoring: When improving existing codebases
+
+💡 Why Follow Best Practices
+
+    Consistency: Code looks similar across projects, reducing cognitive load
+
+    Readability: Easier for others (and future you) to understand
+
+    Maintainability: Easier to modify, extend, and debug
+
+    Performance: Often leads to better performance through idiomatic patterns
+
+    Safety: Avoids common pitfalls and edge cases
+
+    Community: Aligns with ecosystem expectations
+
+📝 Complete Reference
+Naming Conventions
+rust
+
+// ✅ GOOD: Snake case for variables and functions
+let user_name = "Alice";
+let user_age = 30;
+fn calculate_total() -> i32 { 42 }
+fn process_user_data() { }
+
+// ❌ BAD: Camel case in Rust (reserved for types)
+let userName = "Alice";
+fn CalculateTotal() -> i32 { 42 }
+
+// ✅ GOOD: Camel case for types (UpperCamelCase)
+struct UserProfile;
+enum ColorType;
+trait Serializable;
+type Result<T> = std::result::Result<T, MyError>;
+
+// ❌ BAD: Snake case for types
+struct user_profile;
+enum color_type;
+
+// ✅ GOOD: SCREAMING_SNAKE for constants and statics
+const MAX_CONNECTIONS: u32 = 100;
+const DEFAULT_TIMEOUT_MS: u64 = 5000;
+static APPLICATION_NAME: &str = "MyApp";
+
+// ✅ GOOD: UpperCamelCase for enum variants
+enum HttpStatus {
+    Ok,                    // Not OK (capitalized)
+    NotFound,
+    InternalServerError,
+}
+
+// ✅ GOOD: snake_case for module names and file names
+mod user_authentication;
+mod database_connection;
+
+// File: user_authentication.rs
+// File: database_connection.rs
+
+// ✅ GOOD: snake_case for macro names
+macro_rules! my_macro {
+    () => {};
+}
+
+// ✅ GOOD: Prefixed underscores for unused variables
+let _unused = 42;
+fn process(_arg: i32) { }
+
+// ✅ GOOD: Single-character for simple loops
+for i in 0..10 { }  // i is fine for loop index
+let x = 5;          // x is fine for simple values
+
+// ❌ BAD: Single-character for complex meanings
+let a = calculate_something();  // What is 'a'?
+
+Error Handling Best Practices
+rust
+
+// ✅ GOOD: Use Result for recoverable errors
+fn read_config(path: &str) -> Result<Config, ConfigError> {
+    let content = std::fs::read_to_string(path)?;
+    serde_json::from_str(&content).map_err(ConfigError::Parse)
+}
+
+// ✅ GOOD: Create custom error types for libraries using thiserror
+use thiserror::Error;
+
+#[derive(Error, Debug)]
+pub enum ApiError {
+    #[error("Network error: {0}")]
+    Network(#[from] std::io::Error),
+    
+    #[error("Parse error: {0}")]
+    Parse(#[from] serde_json::Error),
+    
+    #[error("Invalid input: {0}")]
+    InvalidInput(String),
+    
+    #[error("Not found: {0}")]
+    NotFound(String),
+    
+    #[error("Unauthorized")]
+    Unauthorized,
+}
+
+// ✅ GOOD: Use anyhow for application error handling
+use anyhow::{Context, Result};
+
+fn main() -> Result<()> {
+    let config = read_config("config.json")
+        .context("Failed to read config file")?;
+    
+    let data = fetch_data(&config)
+        .context("Failed to fetch data from API")?;
+    
+    process(data).context("Failed to process data")?;
+    
+    Ok(())
+}
+
+// ✅ GOOD: Use expect for invariants that should never fail
+let config = read_config("config.json")
+    .expect("Config file is required and must be valid at startup");
+
+// ✅ GOOD: Use unwrap only in tests and prototypes
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_parse() {
+        let value = "42".parse::<i32>().unwrap();  // OK in tests
+        assert_eq!(value, 42);
+    }
+}
+
+// ❌ BAD: Using unwrap in production code
+let data = read_file().unwrap();  // May panic in production!
+
+// ✅ GOOD: Add context to errors for better debugging
+fn parse_config(path: &str) -> Result<Config> {
+    let content = std::fs::read_to_string(path)
+        .with_context(|| format!("Failed to read config file: {}", path))?;
+    
+    serde_json::from_str(&content)
+        .with_context(|| format!("Failed to parse JSON from {}", path))
+}
+
+// ✅ GOOD: Use Box<dyn Error> for simple applications
+use std::error::Error;
+
+fn main() -> Result<(), Box<dyn Error>> {
+    let data = std::fs::read_to_string("data.txt")?;
+    let num: i32 = data.trim().parse()?;
+    println!("Number: {}", num);
+    Ok(())
+}
+
+Option and Result Usage
+rust
+
+// ✅ GOOD: Use Option for optional values (not errors)
+fn find_user(id: u32) -> Option<User> {
+    // Returns None if not found (this is expected, not an error)
+    users.get(&id).cloned()
+}
+
+// ✅ GOOD: Use Result for fallible operations (errors)
+fn load_user(id: u32) -> Result<User, Error> {
+    // Returns Err for actual errors (network, permission, corruption)
+    let data = fs::read_to_string(format!("users/{}.json", id))?;
+    Ok(serde_json::from_str(&data)?)
+}
+
+// ✅ GOOD: Use if let for single pattern matching
+if let Some(user) = find_user(42) {
+    println!("Found: {}", user.name);
+}
+
+// ✅ GOOD: Use while let for loops
+let mut iter = vec![1, 2, 3].into_iter();
+while let Some(value) = iter.next() {
+    println!("{}", value);
+}
+
+// ✅ GOOD: Use map and and_then for Option transformations
+let user_name = find_user(42)
+    .map(|user| user.name)
+    .unwrap_or_else(|| "Unknown".to_string());
+
+// ✅ GOOD: Use ok_or to convert Option to Result
+let user = find_user(42).ok_or("User not found")?;
+
+// ✅ GOOD: Use matches! macro for boolean checks
+if matches!(result, Ok(_)) {
+    println!("Success!");
+}
+
+// ✅ GOOD: Use is_ok/is_err/is_some/is_none for simple checks
+if result.is_ok() {
+    println!("OK");
+}
+
+Pattern Matching Best Practices
+rust
+
+// ✅ GOOD: Use match for exhaustive handling
+match status {
+    Status::Success => handle_success(),
+    Status::Pending => handle_pending(),
+    Status::Error(code) => handle_error(code),
+}
+
+// ✅ GOOD: Use if let for single case
+if let Some(value) = optional {
+    process(value);
+}
+
+// ✅ GOOD: Use matches! for simple checks
+if matches!(status, Status::Success) {
+    println!("Success!");
+}
+
+// ✅ GOOD: Destructure with patterns
+let (x, y) = point;
+let User { name, age, email } = user;
+let (first, second, ..) = tuple;
+
+// ✅ GOOD: Use ref and ref mut for borrowing in patterns
+match optional {
+    Some(ref value) => println!("Borrowed: {}", value),
+    None => (),
+}
+
+// ✅ GOOD: Use @ for binding
+match number {
+    n @ 1..=10 => println!("Small number: {}", n),
+    n @ 20..=30 => println!("Medium number: {}", n),
+    n => println!("Large number: {}", n),
+}
+
+// ✅ GOOD: Use guard clauses for additional conditions
+match number {
+    n if n % 2 == 0 => println!("Even: {}", n),
+    n if n % 2 != 0 => println!("Odd: {}", n),
+    _ => unreachable!(),
+}
+
+Ownership and Borrowing Best Practices
+rust
+
+// ✅ GOOD: Use references when you don't need ownership
+fn process_data(data: &Data) -> Result<(), Error> {
+    // Only reads data, no need to own
+    println!("Processing: {}", data.name);
+    Ok(())
+}
+
+// ✅ GOOD: Use &mut when you need to modify
+fn update_data(data: &mut Data) {
+    data.value += 1;
+    data.updated_at = Utc::now();
+}
+
+// ✅ GOOD: Use move closures when transferring ownership
+let data = vec![1, 2, 3];
+thread::spawn(move || {
+    process_data(data);  // Data moved into thread
+});
+
+// ✅ GOOD: Use Cow for either owned or borrowed data
+use std::borrow::Cow;
+
+fn to_uppercase(s: &str) -> Cow<'_, str> {
+    if s.chars().any(|c| c.is_lowercase()) {
+        Cow::Owned(s.to_uppercase())  // Need to allocate
+    } else {
+        Cow::Borrowed(s)  // No allocation needed
+    }
+}
+
+// ✅ GOOD: Use Clone sparingly; prefer references when possible
+fn process_users(users: &[User]) {  // Borrow, not clone
+    for user in users {
+        process(user);  // Process borrows, not clones
+    }
+}
+
+// ✅ GOOD: Use .clone() only when you truly need independent ownership
+fn store_user(user: &User) {
+    let user_owned = user.clone();  // Need owned copy for storage
+    DATABASE.insert(user_owned);
+}
+
+// ✅ GOOD: Use .to_owned() for &str → String conversion
+let s: String = "hello".to_owned();
+
+Generics and Traits Best Practices
+rust
+
+// ✅ GOOD: Use where clause for complex bounds (more readable)
+fn process<T, U>(a: T, b: U) -> T
+where
+    T: Clone + Debug,
+    U: Display + Default,
+{
+    println!("a: {:?}", a);
+    println!("b: {}", b);
+    a.clone()
+}
+
+// ❌ BAD: Inline bounds for complex constraints (hard to read)
+fn process<T: Clone + Debug, U: Display + Default>(a: T, b: U) -> T { }
+
+// ✅ GOOD: Use impl Trait for simple return types
+fn make_iter() -> impl Iterator<Item = i32> {
+    0..10
+}
+
+// ✅ GOOD: Use trait objects for runtime polymorphism
+let shapes: Vec<Box<dyn Shape>> = vec![
+    Box::new(Circle { radius: 1.0 }),
+    Box::new(Square { side: 2.0 }),
+];
+
+// ✅ GOOD: Use associated types for single output types
+trait Iterator {
+    type Item;  // Each iterator has one Item type
+    fn next(&mut self) -> Option<Self::Item>;
+}
+
+// ✅ GOOD: Use generics for multiple implementations
+trait From<T> {  // Can be implemented multiple times for same type
+    fn from(value: T) -> Self;
+}
+
+// ✅ GOOD: Use supertraits for trait hierarchies
+trait Animal {
+    fn name(&self) -> &str;
+}
+
+trait Pet: Animal {  // Pet requires Animal
+    fn owner(&self) -> &str;
+}
+
+// ✅ GOOD: Provide default implementations when possible
+trait Logger {
+    fn log(&self, msg: &str);
+    
+    // Default implementations
+    fn error(&self, msg: &str) {
+        self.log(&format!("ERROR: {}", msg));
+    }
+    
+    fn warn(&self, msg: &str) {
+        self.log(&format!("WARN: {}", msg));
+    }
+}
+
+Logging and Debugging
+rust
+
+// ✅ GOOD: Use log crate for structured logging
+use log::{info, warn, error, debug, trace};
+
+fn process_user(user_id: u32) -> Result<(), Error> {
+    info!("Processing user: {}", user_id);
+    debug!("User details: {:?}", user);
+    
+    if let Err(e) = save_user(user) {
+        error!("Failed to save user {}: {}", user_id, e);
+        return Err(e);
+    }
+    
+    info!("Successfully processed user: {}", user_id);
+    Ok(())
+}
+
+// ✅ GOOD: Use tracing for async applications
+use tracing::{info, instrument, span, Level, error};
+
+#[instrument(skip(config))]
+async fn handle_request(request: Request, config: Config) -> Result<Response, Error> {
+    info!("Handling request");
+    let span = span!(Level::INFO, "processing");
+    let _enter = span.enter();
+    
+    // ... processing ...
+    
+    Ok(response)
+}
+
+// ✅ GOOD: Use dbg! for quick debugging (prints and returns value)
+fn complex_calculation(x: i32) -> i32 {
+    let y = x * 2;
+    dbg!(y);  // Prints: y = 8
+    let z = y + 5;
+    dbg!(z)   // Returns: 13
+}
+
+// ✅ GOOD: Use debug assertions for invariants (only in debug builds)
+debug_assert!(value > 0, "Value must be positive, got: {}", value);
+debug_assert_eq!(result, expected, "Result didn't match expected");
+
+// ✅ GOOD: Use assert for invariants that should always hold
+assert!(!data.is_empty(), "Data should never be empty");
+assert_eq!(config.port, 8080, "Port must be 8080");
+
+Documentation Best Practices
+rust
+
+// ✅ GOOD: Document all public APIs with examples
+/// Calculates the distance between two points.
+///
+/// Uses the Euclidean distance formula: sqrt((x2-x1)² + (y2-y1)²)
+///
+/// # Examples
+///
+/// ```
+/// use geometry::distance;
+///
+/// let d = distance((0.0, 0.0), (3.0, 4.0));
+/// assert_eq!(d, 5.0);
+/// ```
+///
+/// # Panics
+/// Panics if any coordinate overflows.
+pub fn distance(p1: (f64, f64), p2: (f64, f64)) -> f64 {
+    let dx = p2.0 - p1.0;
+    let dy = p2.1 - p1.1;
+    (dx * dx + dy * dy).sqrt()
+}
+
+// ✅ GOOD: Use module-level documentation
+//! # Geometry Library
+//!
+//! A comprehensive library for geometric calculations.
+//!
+//! ## Features
+//! - Point and vector operations
+//! - Distance calculations
+//! - Transformation utilities
+//! - Shape intersection tests
+//!
+//! ## Quick Start
+//!
+//! ```
+//! use geometry::Point;
+//!
+//! let p1 = Point::new(0.0, 0.0);
+//! let p2 = Point::new(3.0, 4.0);
+//! assert_eq!(p1.distance_to(&p2), 5.0);
+//! ```
+
+// ✅ GOOD: Document error conditions
+/// Parses a configuration string into a Config struct.
+///
+/// # Errors
+///
+/// Returns `ParseError::Empty` if the input string is empty.
+/// Returns `ParseError::InvalidFormat` if the format is invalid.
+/// Returns `ParseError::MissingField` if required fields are missing.
+pub fn parse_config(s: &str) -> Result<Config, ParseError> {
+    // ...
+}
+
+// ✅ GOOD: Document panic conditions
+/// Divides two numbers.
+///
+/// # Panics
+/// Panics if the divisor is zero.
+pub fn divide(a: f64, b: f64) -> f64 {
+    assert!(b != 0.0, "Division by zero");
+    a / b
+}
+
+// ✅ GOOD: Document safety requirements for unsafe code
+/// Copies bytes from source to destination.
+///
+/// # Safety
+/// - `src` and `dst` must be valid for reads/writes of `count` bytes
+/// - The memory regions must not overlap
+/// - Both pointers must be properly aligned
+pub unsafe fn copy_bytes(src: *const u8, dst: *mut u8, count: usize) {
+    // ...
+}
+
+🏆 Code Quality Checklist
+bash
+
+# ✅ Run Clippy for linting (catches common mistakes)
+cargo clippy -- -W clippy::pedantic -W clippy::nursery
+
+# ✅ Run rustfmt for automatic formatting
+cargo fmt -- --check  # Check only
+cargo fmt             # Apply formatting
+
+# ✅ Run tests with coverage (using cargo-tarpaulin)
+cargo tarpaulin --ignore-tests --out Html
+
+# ✅ Check documentation coverage
+cargo rustdoc -- --show-coverage
+
+# ✅ Check for unsafe code (using cargo-geiger)
+cargo geiger
+
+# ✅ Check dependencies for vulnerabilities (using cargo-audit)
+cargo audit
+
+# ✅ Check for outdated dependencies (using cargo-outdated)
+cargo outdated
+
+# ✅ Run tests with sanitizers (nightly)
+RUSTFLAGS="-Z sanitizer=address" cargo test --target x86_64-unknown-linux-gnu
+
+# ✅ Check binary size (using cargo-bloat)
+cargo bloat --release
+
+# ✅ Run benchmarks
+cargo bench
+
+2️⃣ CODE ORGANIZATION
+📖 What is it?
+
+Code organization in Rust involves structuring your project into modules, crates, and workspaces to maintain clarity, separation of concerns, and reusability as your codebase grows.
+🎯 When to Apply Organization
+
+    Small projects (1-5 files): Use single crate with modules
+
+    Medium projects (5-20 files): Split into modules with clear boundaries
+
+    Large projects (20+ files): Use multiple crates in a workspace
+
+    Libraries: Create focused, reusable crates with minimal dependencies
+
+    Applications: Separate concerns into distinct layers
+
+💡 Why Organize Code
+
+    Maintainability: Easier to find and modify code
+
+    Separation of concerns: Each module has a single responsibility
+
+    Reusability: Code can be shared across projects
+
+    Compilation speed: Only recompile changed modules
+
+    Team collaboration: Clear ownership of code areas
+
+    Testing: Isolated modules are easier to test
+
+📝 Complete Reference
+Module Organization Structure
+text
+
+my_project/
+├── Cargo.toml
+├── build.rs
+├── README.md
+├── src/
+│   ├── main.rs
+│   ├── lib.rs
+│   ├── config/
+│   │   ├── mod.rs
+│   │   ├── env.rs
+│   │   ├── server.rs
+│   │   └── database.rs
+│   ├── models/
+│   │   ├── mod.rs
+│   │   ├── user.rs
+│   │   ├── session.rs
+│   │   └── error.rs
+│   ├── repositories/
+│   │   ├── mod.rs
+│   │   ├── user_repository.rs
+│   │   └── session_repository.rs
+│   ├── services/
+│   │   ├── mod.rs
+│   │   ├── user_service.rs
+│   │   └── auth_service.rs
+│   ├── handlers/
+│   │   ├── mod.rs
+│   │   ├── user_handler.rs
+│   │   └── auth_handler.rs
+│   ├── middleware/
+│   │   ├── mod.rs
+│   │   ├── auth.rs
+│   │   ├── logging.rs
+│   │   └── metrics.rs
+│   └── utils/
+│       ├── mod.rs
+│       ├── string_utils.rs
+│       └── time_utils.rs
+├── tests/
+│   ├── integration_test.rs
+│   └── common/
+│       └── mod.rs
+├── benches/
+│   └── benchmark.rs
+├── examples/
+│   ├── basic.rs
+│   └── advanced.rs
+└── target/
+
+Module Definition
+rust
+
+// src/main.rs - Binary crate entry point
+mod config;
+mod handlers;
+mod middleware;
+mod models;
+mod repositories;
+mod services;
+mod utils;
+
+use config::Config;
+use services::UserService;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    let config = Config::from_env()?;
+    let user_service = UserService::new(&config).await?;
+    
+    run_server(user_service).await?;
+    Ok(())
+}
+
+rust
+
+// src/lib.rs - Library crate (for shared code)
+//! # MyApp Core Library
+//! Core functionality for the application.
+
+pub mod config;
+pub mod error;
+pub mod models;
+pub mod repositories;
+pub mod services;
+
+// Re-export commonly used types for easier imports
+pub use error::{Error, Result};
+pub use models::{User, UserId};
+pub use services::UserService;
+
+rust
+
+// src/config/mod.rs - Module with re-exports
+mod env;
+mod server;
+mod database;
+
+pub use env::EnvConfig;
+pub use server::ServerConfig;
+pub use database::DatabaseConfig;
+
+use serde::Deserialize;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Config {
+    pub env: EnvConfig,
+    pub server: ServerConfig,
+    pub database: DatabaseConfig,
+}
+
+impl Config {
+    pub fn from_env() -> Result<Self, ConfigError> {
+        Ok(Config {
+            env: EnvConfig::from_env()?,
+            server: ServerConfig::from_env()?,
+            database: DatabaseConfig::from_env()?,
+        })
+    }
+    
+    pub fn validate(&self) -> Result<(), ConfigError> {
+        self.server.validate()?;
+        self.database.validate()?;
+        Ok(())
+    }
+}
+
+rust
+
+// src/models/user.rs - Domain model
+use serde::{Serialize, Deserialize};
+use chrono::{DateTime, Utc};
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+pub struct User {
+    pub id: UserId,
+    pub name: String,
+    pub email: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct UserId(pub u64);
+
+impl User {
+    pub fn new(name: String, email: String) -> Self {
+        let now = Utc::now();
+        User {
+            id: UserId(0),  // Will be set by repository
+            name,
+            email,
+            created_at: now,
+            updated_at: now,
+        }
+    }
+    
+    pub fn update_email(&mut self, email: String) {
+        self.email = email;
+        self.updated_at = Utc::now();
+    }
+    
+    pub fn update_name(&mut self, name: String) {
+        self.name = name;
+        self.updated_at = Utc::now();
+    }
+}
+
+Feature-Based Organization
+toml
+
+# Cargo.toml - Feature flags
+[features]
+default = ["http", "json"]
+http = ["dep:reqwest", "dep:hyper"]
+json = ["dep:serde", "dep:serde_json"]
+cli = ["dep:clap", "dep:atty"]
+async = ["dep:tokio", "dep:futures"]
+full = ["http", "json", "cli", "async"]
+
+rust
+
+// src/lib.rs - Conditional compilation
+#![cfg_attr(not(feature = "std"), no_std)]
+
+// Conditionally include modules based on features
+#[cfg(feature = "http")]
+pub mod http;
+
+#[cfg(feature = "json")]
+pub mod json;
+
+#[cfg(feature = "cli")]
+pub mod cli;
+
+#[cfg(feature = "async")]
+pub mod async_runtime;
+
+// Feature-gated functions
+#[cfg(feature = "json")]
+pub fn to_json<T: Serialize>(value: &T) -> Result<String> {
+    serde_json::to_string(value).map_err(Into::into)
+}
+
+// Feature-gated implementations
+#[cfg(feature = "http")]
+impl<T: Serialize> RequestBuilder<T> {
+    pub fn send(&self) -> Result<Response> {
+        // HTTP implementation
+    }
+}
+
+// Compile error if no features enabled
+#[cfg(not(any(feature = "http", feature = "json", feature = "cli")))]
+compile_error!("At least one feature must be enabled");
+
+Workspace Organization
+toml
+
+# Root Cargo.toml
+[workspace]
+members = [
+    "crates/core",
+    "crates/api",
+    "crates/cli",
+    "crates/models",
+    "crates/migrations",
+    "crates/shared",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+authors = ["Your Name <email@example.com>"]
+license = "MIT OR Apache-2.0"
+
+[workspace.dependencies]
+# Shared dependencies with consistent versions
+tokio = { version = "1.0", features = ["full"] }
+serde = { version = "1.0", features = ["derive"] }
+anyhow = "1.0"
+thiserror = "1.0"
+tracing = "0.1"
+tracing-subscriber = "0.3"
+
+toml
+
+# crates/core/Cargo.toml
+[package]
+name = "myapp-core"
+version.workspace = true
+edition.workspace = true
+authors.workspace = true
+license.workspace = true
+
+[dependencies]
+serde.workspace = true
+thiserror.workspace = true
+tracing.workspace = true
+
+[features]
+default = ["std"]
+std = []
+
+toml
+
+# crates/api/Cargo.toml
+[package]
+name = "myapp-api"
+version.workspace = true
+edition.workspace = true
+
+[dependencies]
+myapp-core = { path = "../core" }
+tokio.workspace = true
+serde.workspace = true
+axum = "0.7"
+
+Separation of Concerns
+rust
+
+// ✅ GOOD: Separate models from business logic
+// models/user.rs - Pure data structures
+#[derive(Debug, Serialize, Deserialize)]
+pub struct User {
+    pub id: UserId,
+    pub name: String,
+    pub email: String,
+}
+
+// services/user_service.rs - Business logic
+pub struct UserService {
+    repository: Box<dyn UserRepository>,
+    validator: Box<dyn UserValidator>,
+}
+
+impl UserService {
+    pub async fn create_user(&self, name: String, email: String) -> Result<User> {
+        // Validation
+        self.validator.validate_name(&name)?;
+        self.validator.validate_email(&email)?;
+        
+        // Business logic
+        let user = User::new(name, email);
+        
+        // Persistence
+        self.repository.save(&user).await?;
+        
+        Ok(user)
+    }
+}
+
+// repositories/user_repository.rs - Data access
+#[async_trait]
+pub trait UserRepository: Send + Sync {
+    async fn find_by_id(&self, id: UserId) -> Result<Option<User>>;
+    async fn find_by_email(&self, email: &str) -> Result<Option<User>>;
+    async fn save(&self, user: &User) -> Result<User>;
+}
+
+// handlers/user_handler.rs - HTTP layer
+pub async fn create_user(
+    State(service): State<Arc<UserService>>,
+    Json(payload): Json<CreateUserRequest>,
+) -> impl IntoResponse {
+    match service.create_user(payload.name, payload.email).await {
+        Ok(user) => (StatusCode::CREATED, Json(user)).into_response(),
+        Err(e) => handle_error(e).into_response(),
+    }
+}
+
+3️⃣ PERFORMANCE OPTIMIZATION
+📖 What is it?
+
+Performance optimization in Rust involves identifying bottlenecks, using profiling tools, and applying optimization techniques to make your code faster and more memory-efficient.
+🎯 When to Optimize
+
+    After profiling: Only optimize what's actually slow (measure first!)
+
+    Hot paths: Critical sections that run frequently (inner loops)
+
+    Memory constraints: When memory usage is high or growing
+
+    Startup time: For CLI tools and services where startup latency matters
+
+    Latency-sensitive: Real-time applications, user-facing services
+
+    Throughput: When handling high request volumes
+
+💡 Why Optimize
+
+    User experience: Faster applications are better
+
+    Resource efficiency: Lower CPU and memory usage
+
+    Scalability: Handle more requests with same infrastructure
+
+    Cost savings: Less cloud infrastructure needed
+
+    Battery life: Important for mobile/embedded devices
+
+📝 Complete Reference
+Profiling with Criterion (Benchmarking)
+rust
+
+// benches/benchmark.rs
+use criterion::{criterion_group, criterion_main, Criterion, black_box};
+
+fn fibonacci_recursive(n: u64) -> u64 {
+    match n {
+        0 => 0,
+        1 => 1,
+        _ => fibonacci_recursive(n - 1) + fibonacci_recursive(n - 2),
+    }
+}
+
+fn fibonacci_iterative(n: u64) -> u64 {
+    let mut a = 0;
+    let mut b = 1;
+    for _ in 0..n {
+        let c = a + b;
+        a = b;
+        b = c;
+    }
+    a
+}
+
+fn bench_fibonacci(c: &mut Criterion) {
+    let mut group = c.benchmark_group("Fibonacci");
+    
+    // Compare different implementations
+    group.bench_function("recursive 30", |b| {
+        b.iter(|| fibonacci_recursive(black_box(30)))
+    });
+    
+    group.bench_function("iterative 30", |b| {
+        b.iter(|| fibonacci_iterative(black_box(30)))
+    });
+    
+    // Parameterized benchmarks
+    for size in [10, 20, 30, 40].iter() {
+        group.bench_with_input(
+            format!("recursive_{}", size),
+            size,
+            |b, &size| b.iter(|| fibonacci_recursive(black_box(size)))
+        );
+    }
+    
+    group.finish();
+}
+
+criterion_group!(benches, bench_fibonacci);
+criterion_main!(benches);
+
+toml
+
+# Cargo.toml
+[dev-dependencies]
+criterion = { version = "0.5", features = ["html_reports"] }
+
+[[bench]]
+name = "benchmark"
+harness = false
+
+bash
+
+# Run benchmarks
+cargo bench
+
+# Run with baseline comparison
+cargo bench -- --save-baseline before
+# Make changes...
+cargo bench -- --baseline before
+
+# Open HTML report
+open target/criterion/report/index.html
+
+Flamegraphs for CPU Profiling
+bash
+
+# Install flamegraph
+cargo install flamegraph
+
+# Generate flamegraph for binary
+cargo flamegraph --bin my_app
+
+# With arguments
+cargo flamegraph --bin my_app -- --input data.txt
+
+# Open in browser
+cargo flamegraph --open
+
+# Profile a specific function
+cargo flamegraph --bin my_app --profile=release -- --bench
+
+rust
+
+// Add profiling instrumentation
+use std::time::Instant;
+
+#[macro_export]
+macro_rules! profile {
+    ($name:expr, $block:block) => {{
+        let start = Instant::now();
+        let result = $block;
+        let duration = start.elapsed();
+        println!("{} took: {:?}", $name, duration);
+        result
+    }};
+}
+
+// Usage
+fn process_data() {
+    let data = profile!("data loading", {
+        load_from_disk()
+    });
+    
+    let processed = profile!("data processing", {
+        transform_data(&data)
+    });
+    
+    profile!("saving", {
+        save_to_disk(&processed)
+    });
+}
+
+Memory Optimization
+rust
+
+// ✅ GOOD: Use Box for large heap allocations (avoid stack overflow)
+struct LargeData {
+    data: Box<[u8; 1_000_000]>,  // 1MB on heap, not stack
+}
+
+// ✅ GOOD: Use Vec with capacity pre-allocation
+let mut vec = Vec::with_capacity(1000);
+for i in 0..1000 {
+    vec.push(i);  // No reallocation
+}
+
+// ✅ GOOD: Use iterators instead of collecting when possible
+// ❌ Creates intermediate vector (allocation)
+let result: Vec<_> = data.iter().map(|x| x * 2).collect();
+for x in result {
+    process(x);
+}
+
+// ✅ No allocation, processes in place
+data.iter().map(|x| x * 2).for_each(process);
+
+// ✅ GOOD: Use Cow to avoid unnecessary allocations
+use std::borrow::Cow;
+
+fn to_uppercase(s: &str) -> Cow<'_, str> {
+    if s.chars().any(|c| c.is_lowercase()) {
+        Cow::Owned(s.to_uppercase())  // Only allocate if needed
+    } else {
+        Cow::Borrowed(s)  // No allocation
+    }
+}
+
+// ✅ GOOD: Use smallvec for small collections
+use smallvec::SmallVec;
+
+let mut v: SmallVec<[i32; 4]> = SmallVec::new();
+v.push(1);  // Stored on stack
+v.push(2);
+v.push(3);  // Still on stack
+v.push(4);  // Still on stack
+v.push(5);  // Now moves to heap
+
+// ✅ GOOD: Use arrayvec for fixed-size collections
+use arrayvec::ArrayVec;
+
+let mut v: ArrayVec<i32, 10> = ArrayVec::new();
+v.push(1);  // Always stack-allocated
+
+Algorithm Optimization
+rust
+
+// ✅ GOOD: Choose appropriate data structures
+// HashMap: O(1) lookups for key-value
+// BTreeMap: O(log n) lookups with sorted order
+// Vec: O(1) indexed access, sequential iteration
+// HashSet: O(1) uniqueness checks
+// BinaryHeap: Priority queue
+
+// ✅ GOOD: Avoid unnecessary clones
+// ❌ Bad - clones in loop
+for item in &items {
+    process(item.clone());  // Expensive!
+}
+
+// ✅ Good - borrows
+for item in &items {
+    process(item);  // Borrows
+}
+
+// ✅ GOOD: Use iterators for zero-cost abstractions
+// ❌ Manual loop
+let mut result = Vec::new();
+for i in 0..data.len() {
+    if data[i] > 0 {
+        result.push(data[i] * 2);
+    }
+}
+
+// ✅ Iterator (often optimized to same as manual loop)
+let result: Vec<_> = data
+    .iter()
+    .filter(|&&x| x > 0)
+    .map(|&x| x * 2)
+    .collect();
+
+// ✅ GOOD: Use references in function parameters
+// ❌ Bad - takes ownership
+fn process(data: Vec<i32>) -> Vec<i32> {
+    data.into_iter().map(|x| x * 2).collect()
+}
+
+// ✅ Good - borrows
+fn process(data: &[i32]) -> Vec<i32> {
+    data.iter().map(|&x| x * 2).collect()
+}
+
+// ✅ GOOD: Use `#[inline]` for small, hot functions
+#[inline(always)]
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+Compiler Optimization Flags
+toml
+
+# Cargo.toml - Release profile optimizations
+[profile.release]
+# Optimization level: 0-3 (3 is highest)
+opt-level = 3
+
+# Link-time optimization
+lto = true
+
+# Use fewer codegen units for better optimization (slower compile)
+codegen-units = 1
+
+# Strip debug symbols
+strip = true
+
+# Panic = abort for smaller binaries (no unwinding)
+panic = "abort"
+
+# Enable overflow checks (safety)
+overflow-checks = true
+
+# Use CPU-specific optimizations
+[profile.release.package."my-crate"]
+opt-level = 3
+
+rust
+
+// ✅ GOOD: Use `#[repr(transparent)]` for zero-cost wrappers
+#[repr(transparent)]
+struct UserId(u64);  // Same memory layout as u64, zero overhead
+
+// ✅ GOOD: Use `#[repr(C)]` for C FFI compatibility
+#[repr(C)]
+struct Point {
+    x: f64,
+    y: f64,
+}
+
+// ✅ GOOD: Use `#[repr(u8)]` for enum size optimization
+#[repr(u8)]
+enum Status {
+    Active = 0,
+    Inactive = 1,
+    Pending = 2,
+    // 1 byte instead of default usize
+}
+
+Async Performance Optimization
+rust
+
+// ✅ GOOD: Choose appropriate runtime for workload
+// Multi-threaded for CPU-bound work
+#[tokio::main(flavor = "multi_thread", worker_threads = 4)]
+async fn main() {
+    // ...
+}
+
+// Current-thread for I/O-bound, low latency
+#[tokio::main(flavor = "current_thread")]
+async fn main() {
+    // ...
+}
+
+// ✅ GOOD: Use spawn_blocking for blocking operations
+tokio::task::spawn_blocking(|| {
+    // CPU-intensive work that would block
+    expensive_calculation()
+}).await?;
+
+// ✅ GOOD: Batch operations to reduce overhead
+async fn process_batch(items: &[Item]) -> Result<Vec<Result>> {
+    let tasks: Vec<_> = items
+        .iter()
+        .map(|item| tokio::spawn(process_item(item)))
+        .collect();
+    
+    let results = futures::future::join_all(tasks).await;
+    Ok(results.into_iter().collect())
+}
+
+// ✅ GOOD: Use semaphores to limit concurrency
+use tokio::sync::Semaphore;
+
+async fn process_many(items: &[Item]) {
+    let semaphore = Semaphore::new(10);  // Max 10 concurrent
+    
+    let mut handles = vec![];
+    for item in items {
+        let permit = semaphore.acquire().await.unwrap();
+        let handle = tokio::spawn(async move {
+            process(item).await;
+            drop(permit);
+        });
+        handles.push(handle);
+    }
+    
+    futures::future::join_all(handles).await;
+}
+
+// ✅ GOOD: Use buffer for streams
+use futures::stream::{self, StreamExt};
+
+async fn process_stream(stream: impl Stream<Item = Data>) {
+    stream
+        .buffer_unordered(10)  // Process 10 concurrently
+        .for_each(|item| async move {
+            process(item).await;
+        })
+        .await;
+}
+
+Common Optimization Mistakes to Avoid
+rust
+
+// ❌ Premature optimization - hard to read
+let result = (0..100).fold(0, |acc, x| acc + x);
+
+// ✅ Clear and still fast (compiler optimizes)
+let result: i32 = (0..100).sum();
+
+// ❌ Unnecessary allocation
+let s = format!("{}", x);
+let y = s.parse::<i32>().unwrap();
+
+// ✅ No allocation
+let y = x;
+
+// ❌ Over-optimizing small vectors
+let v = Vec::with_capacity(3);
+v.push(1);
+v.push(2);
+v.push(3);
+
+// ✅ Simpler, still fine for small vectors
+let v = vec![1, 2, 3];
+
+// ❌ Using unsafe for no reason
+unsafe {
+    *ptr = 42;
+}
+
+// ✅ Safe alternative
+let value = 42;
+
+// ❌ Micro-optimizations that hurt readability
+let result = if condition { 1 } else { 0 };  // fine
+let result = condition as i32;  // clever but less clear
+
+// ✅ Prefer clarity
+let result = if condition { 1 } else { 0 };
+
+4️⃣ REAL-WORLD PROJECT ARCHITECTURE
+📖 What is it?
+
+Real-world project architecture encompasses the patterns, structures, and practices used in production Rust applications. It includes everything from project layout to error handling, logging, configuration, and deployment.
+🎯 When to Apply Architecture Patterns
+
+    All projects: Follow basic structure for maintainability
+
+    Large applications: Use layered architecture for separation
+
+    Libraries: Design ergonomic APIs with proper documentation
+
+    CLI tools: Focus on user experience and error messages
+
+    Web services: Implement proper middleware and observability
+
+💡 Why Use Architecture Patterns
+
+    Scalability: Code can grow without becoming messy
+
+    Maintainability: Clear separation of concerns
+
+    Testability: Components can be tested in isolation
+
+    Team collaboration: Clear ownership boundaries
+
+    Production readiness: Includes logging, metrics, health checks
+
+    Deployment: Standardized configuration and environment handling
+
+📝 Complete Reference
+Complete Layered Architecture
+rust
+
+// src/main.rs - Entry point
+use myapp::{config, logging, server};
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    // 1. Initialize logging first
+    logging::init()?;
+    tracing::info!("Starting application");
+    
+    // 2. Load configuration
+    let config = config::Config::from_env()?;
+    tracing::debug!("Config loaded: {:?}", config);
+    
+    // 3. Validate configuration
+    config.validate()?;
+    
+    // 4. Run server
+    server::run(config).await?;
+    
+    Ok(())
+}
+
+rust
+
+// src/lib.rs - Library crate
+//! # MyApp
+//! A production-ready web application framework.
+
+pub mod config;
+pub mod error;
+pub mod logging;
+pub mod middleware;
+pub mod models;
+pub mod repositories;
+pub mod services;
+pub mod server;
+
+// Re-export commonly used types
+pub use error::{Error, Result};
+pub use models::{User, UserId};
+pub use services::UserService;
+
+rust
+
+// src/config/mod.rs - Configuration management
+use serde::Deserialize;
+use std::env;
+
+#[derive(Debug, Clone, Deserialize)]
+pub struct Config {
+    pub environment: Environment,
+    pub server: ServerConfig,
+    pub database: DatabaseConfig,
+    pub redis: RedisConfig,
+    pub logging: LoggingConfig,
+}
+
+#[derive(Debug, Clone, Deserialize, PartialEq)]
+#[serde(rename_all = "lowercase")]
+pub enum Environment {
+    Development,
+    Staging,
+    Production,
+}
+
+impl Config {
+    pub fn from_env() -> Result<Self, ConfigError> {
+        // Try to load from file first
+        let config = if let Ok(path) = env::var("CONFIG_PATH") {
+            Self::from_file(&path)?
+        } else {
+            Self::from_env_vars()?
+        };
+        
+        config.validate()?;
+        Ok(config)
+    }
+    
+    fn from_file(path: &str) -> Result<Self, ConfigError> {
+        let content = std::fs::read_to_string(path)?;
+        Ok(serde_yaml::from_str(&content)?)
+    }
+    
+    fn from_env_vars() -> Result<Self, ConfigError> {
+        Ok(Config {
+            environment: env::var("ENVIRONMENT")
+                .unwrap_or_else(|_| "development".into())
+                .parse()?,
+            server: ServerConfig {
+                host: env::var("SERVER_HOST").unwrap_or_else(|_| "0.0.0.0".into()),
+                port: env::var("SERVER_PORT").unwrap_or_else(|_| "8080".into()).parse()?,
+                workers: env::var("SERVER_WORKERS")
+                    .unwrap_or_else(|_| num_cpus::get().to_string())
+                    .parse()?,
+                timeout_secs: env::var("SERVER_TIMEOUT")
+                    .unwrap_or_else(|_| "30".into())
+                    .parse()?,
+            },
+            database: DatabaseConfig {
+                url: env::var("DATABASE_URL")?,
+                max_connections: env::var("DATABASE_POOL_SIZE")
+                    .unwrap_or_else(|_| "10".into())
+                    .parse()?,
+                connect_timeout_secs: env::var("DATABASE_CONNECT_TIMEOUT")
+                    .unwrap_or_else(|_| "10".into())
+                    .parse()?,
+            },
+            redis: RedisConfig {
+                url: env::var("REDIS_URL").unwrap_or_else(|_| "redis://localhost".into()),
+                max_connections: env::var("REDIS_POOL_SIZE")
+                    .unwrap_or_else(|_| "5".into())
+                    .parse()?,
+            },
+            logging: LoggingConfig {
+                level: env::var("LOG_LEVEL").unwrap_or_else(|_| "info".into()),
+                format: env::var("LOG_FORMAT").unwrap_or_else(|_| "json".into()),
+            },
+        })
+    }
+    
+    fn validate(&self) -> Result<(), ConfigError> {
+        if self.server.port == 0 || self.server.port > 65535 {
+            return Err(ConfigError::InvalidPort);
+        }
+        if self.database.max_connections == 0 {
+            return Err(ConfigError::InvalidPoolSize);
+        }
+        if self.server.workers == 0 {
+            return Err(ConfigError::InvalidWorkers);
+        }
+        Ok(())
+    }
+}
+
+rust
+
+// src/logging.rs - Observability setup
+use tracing_subscriber::{fmt, prelude::*, EnvFilter};
+use tracing::Level;
+
+pub fn init() -> anyhow::Result<()> {
+    let filter = EnvFilter::try_from_default_env()
+        .unwrap_or_else(|_| EnvFilter::new("info"));
+    
+    let subscriber = fmt::Subscriber::builder()
+        .with_env_filter(filter)
+        .with_target(true)
+        .with_thread_ids(true)
+        .with_file(true)
+        .with_line_number(true)
+        .json()
+        .finish();
+    
+    tracing::subscriber::set_global_default(subscriber)?;
+    
+    Ok(())
+}
+
+rust
+
+// src/models/user.rs - Domain models
+use serde::{Serialize, Deserialize};
+use chrono::{DateTime, Utc};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct User {
+    pub id: UserId,
+    pub name: String,
+    pub email: String,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Hash)]
+pub struct UserId(pub i64);
+
+impl User {
+    pub fn new(name: String, email: String) -> Self {
+        let now = Utc::now();
+        User {
+            id: UserId(0),
+            name,
+            email,
+            created_at: now,
+            updated_at: now,
+        }
+    }
+    
+    pub fn update_email(&mut self, email: String) {
+        self.email = email;
+        self.updated_at = Utc::now();
+    }
+}
+
+rust
+
+// src/repositories/user_repository.rs - Data access layer
+use async_trait::async_trait;
+use crate::{models::User, error::Result};
+
+#[async_trait]
+pub trait UserRepository: Send + Sync {
+    async fn find_by_id(&self, id: UserId) -> Result<Option<User>>;
+    async fn find_by_email(&self, email: &str) -> Result<Option<User>>;
+    async fn list(&self, limit: usize, offset: usize) -> Result<Vec<User>>;
+    async fn create(&self, user: &User) -> Result<User>;
+    async fn update(&self, user: &User) -> Result<User>;
+    async fn delete(&self, id: UserId) -> Result<()>;
+    async fn count(&self) -> Result<usize>;
+}
+
+// PostgreSQL implementation
+pub struct PostgresUserRepository {
+    pool: PgPool,
+}
+
+impl PostgresUserRepository {
+    pub fn new(pool: PgPool) -> Self {
+        PostgresUserRepository { pool }
+    }
+}
+
+#[async_trait]
+impl UserRepository for PostgresUserRepository {
+    async fn find_by_id(&self, id: UserId) -> Result<Option<User>> {
+        let result = sqlx::query_as!(
+            User,
+            r#"
+            SELECT id as "id: _", name, email, created_at, updated_at
+            FROM users
+            WHERE id = $1
+            "#,
+            id.0
+        )
+        .fetch_optional(&self.pool)
+        .await?;
+        
+        Ok(result)
+    }
+    
+    async fn create(&self, user: &User) -> Result<User> {
+        let result = sqlx::query_as!(
+            User,
+            r#"
+            INSERT INTO users (name, email, created_at, updated_at)
+            VALUES ($1, $2, $3, $4)
+            RETURNING id as "id: _", name, email, created_at, updated_at
+            "#,
+            user.name,
+            user.email,
+            user.created_at,
+            user.updated_at
+        )
+        .fetch_one(&self.pool)
+        .await?;
+        
+        Ok(result)
+    }
+    
+    // ... other methods
+}
+
+rust
+
+// src/services/user_service.rs - Business logic layer
+use crate::{
+    models::{User, UserId},
+    repositories::UserRepository,
+    error::{Error, Result},
+};
+use tracing::{info, warn};
+
+pub struct UserService {
+    repository: Box<dyn UserRepository>,
+}
+
+impl UserService {
+    pub fn new(repository: Box<dyn UserRepository>) -> Self {
+        UserService { repository }
+    }
+    
+    pub async fn get_user(&self, id: UserId) -> Result<Option<User>> {
+        info!("Getting user: {:?}", id);
+        self.repository.find_by_id(id).await
+    }
+    
+    pub async fn create_user(&self, name: String, email: String) -> Result<User> {
+        info!("Creating user: {}", email);
+        
+        // Validate input
+        if name.is_empty() {
+            return Err(Error::Validation("Name cannot be empty".into()));
+        }
+        
+        if !email.contains('@') || !email.contains('.') {
+            return Err(Error::Validation("Invalid email format".into()));
+        }
+        
+        // Check for existing user
+        if let Some(existing) = self.repository.find_by_email(&email).await? {
+            warn!("User already exists: {}", email);
+            return Err(Error::Conflict("User already exists".into()));
+        }
+        
+        // Create user
+        let user = User::new(name, email);
+        let created = self.repository.create(&user).await?;
+        
+        info!("User created: {:?}", created.id);
+        Ok(created)
+    }
+    
+    pub async fn update_email(&self, id: UserId, email: String) -> Result<User> {
+        info!("Updating email for user: {:?}", id);
+        
+        // Validate
+        if !email.contains('@') {
+            return Err(Error::Validation("Invalid email format".into()));
+        }
+        
+        // Get user
+        let mut user = self.repository
+            .find_by_id(id)
+            .await?
+            .ok_or_else(|| Error::NotFound(format!("User {} not found", id.0)))?;
+        
+        // Update
+        user.update_email(email);
+        
+        // Save
+        let updated = self.repository.update(&user).await?;
+        
+        info!("Email updated for user: {:?}", id);
+        Ok(updated)
+    }
+    
+    pub async fn delete_user(&self, id: UserId) -> Result<()> {
+        info!("Deleting user: {:?}", id);
+        
+        // Check exists
+        if self.repository.find_by_id(id).await?.is_none() {
+            return Err(Error::NotFound(format!("User {} not found", id.0)));
+        }
+        
+        self.repository.delete(id).await?;
+        
+        info!("User deleted: {:?}", id);
+        Ok(())
+    }
+}
+
+rust
+
+// src/handlers/user_handler.rs - HTTP layer
+use axum::{
+    extract::{Path, State},
+    Json,
+    response::{IntoResponse, Response},
+    http::StatusCode,
+};
+use crate::{
+    services::UserService,
+    models::{User, UserId},
+    error::Error,
+};
+use tracing::error;
+
+pub async fn get_user(
+    State(service): State<axum::extract::Extension<Arc<UserService>>>,
+    Path(id): Path<i64>,
+) -> impl IntoResponse {
+    match service.get_user(UserId(id)).await {
+        Ok(Some(user)) => (StatusCode::OK, Json(user)).into_response(),
+        Ok(None) => (StatusCode::NOT_FOUND, "User not found").into_response(),
+        Err(e) => handle_error(e),
+    }
+}
+
+pub async fn create_user(
+    State(service): State<axum::extract::Extension<Arc<UserService>>>,
+    Json(payload): Json<CreateUserRequest>,
+) -> impl IntoResponse {
+    match service.create_user(payload.name, payload.email).await {
+        Ok(user) => (StatusCode::CREATED, Json(user)).into_response(),
+        Err(e) => handle_error(e),
+    }
+}
+
+pub async fn update_user_email(
+    State(service): State<axum::extract::Extension<Arc<UserService>>>,
+    Path(id): Path<i64>,
+    Json(payload): Json<UpdateEmailRequest>,
+) -> impl IntoResponse {
+    match service.update_email(UserId(id), payload.email).await {
+        Ok(user) => (StatusCode::OK, Json(user)).into_response(),
+        Err(e) => handle_error(e),
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateUserRequest {
+    name: String,
+    email: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct UpdateEmailRequest {
+    email: String,
+}
+
+fn handle_error(error: Error) -> Response {
+    error!("Request failed: {}", error);
+    
+    let (status, message) = match error {
+        Error::Validation(msg) => (StatusCode::BAD_REQUEST, msg),
+        Error::NotFound(msg) => (StatusCode::NOT_FOUND, msg),
+        Error::Conflict(msg) => (StatusCode::CONFLICT, msg),
+        Error::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized".into()),
+        _ => (StatusCode::INTERNAL_SERVER_ERROR, "Internal error".into()),
+    };
+    
+    (status, message).into_response()
+}
+
+rust
+
+// src/middleware/mod.rs - Middleware components
+mod auth;
+mod logging;
+mod metrics;
+mod cors;
+
+pub use auth::auth;
+pub use logging::logging;
+pub use metrics::metrics;
+pub use cors::cors;
+
+rust
+
+// src/middleware/logging.rs
+use axum::{http::Request, middleware::Next, response::Response};
+use std::time::Instant;
+use tracing::info;
+
+pub async fn logging<B>(req: Request<B>, next: Next<B>) -> Response {
+    let start = Instant::now();
+    let method = req.method().clone();
+    let path = req.uri().path().to_string();
+    
+    let response = next.run(req).await;
+    
+    let duration = start.elapsed();
+    let status = response.status();
+    
+    info!(
+        method = %method,
+        path = %path,
+        status = %status,
+        duration_ms = duration.as_millis(),
+        "Request completed"
+    );
+    
+    response
+}
+
+rust
+
+// src/server.rs - Application server setup
+use axum::{
+    Router,
+    routing::{get, post, put, delete},
+    extract::Extension,
+    middleware,
+};
+use std::sync::Arc;
+use tower_http::trace::TraceLayer;
+
+pub async fn run(config: Config) -> anyhow::Result<()> {
+    // Initialize database pool
+    let pool = init_database(&config.database).await?;
+    
+    // Initialize repositories
+    let user_repo = Arc::new(PostgresUserRepository::new(pool));
+    
+    // Initialize services
+    let user_service = Arc::new(UserService::new(user_repo));
+    
+    // Build router
+    let app = Router::new()
+        .route("/users", post(handlers::create_user))
+        .route("/users/:id", get(handlers::get_user))
+        .route("/users/:id/email", put(handlers::update_user_email))
+        .route("/users/:id", delete(handlers::delete_user))
+        .layer(Extension(user_service))
+        .layer(Extension(config.clone()))
+        .layer(middleware::from_fn(middleware::logging))
+        .layer(middleware::from_fn(middleware::metrics))
+        .layer(TraceLayer::new_for_http());
+    
+    // Start server
+    let addr = std::net::SocketAddr::from(([0, 0, 0, 0], config.server.port));
+    tracing::info!("Server listening on {}", addr);
+    
+    axum::Server::bind(&addr)
+        .serve(app.into_make_service())
+        .with_graceful_shutdown(shutdown_signal())
+        .await?;
+    
+    Ok(())
+}
+
+async fn shutdown_signal() {
+    let ctrl_c = async {
+        tokio::signal::ctrl_c()
+            .await
+            .expect("failed to install Ctrl+C handler");
+        tracing::info!("Ctrl+C received, shutting down...");
+    };
+    
+    #[cfg(unix)]
+    let terminate = async {
+        tokio::signal::unix::signal(tokio::signal::unix::SignalKind::terminate())
+            .expect("failed to install signal handler")
+            .recv()
+            .await;
+        tracing::info!("SIGTERM received, shutting down...");
+    };
+    
+    #[cfg(not(unix))]
+    let terminate = std::future::pending::<()>();
+    
+    tokio::select! {
+        _ = ctrl_c => {},
+        _ = terminate => {},
+    }
+}
+
+Health Check Endpoint
+rust
+
+// src/handlers/health.rs
+use axum::{Json, response::IntoResponse};
+use serde::Serialize;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+#[derive(Serialize)]
+struct HealthResponse {
+    status: &'static str,
+    version: &'static str,
+    timestamp: u64,
+    uptime: u64,
+}
+
+static START_TIME: std::sync::OnceLock<u64> = std::sync::OnceLock::new();
+
+pub async fn health() -> impl IntoResponse {
+    let start = *START_TIME.get_or_init(|| {
+        SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_secs()
+    });
+    
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs();
+    
+    Json(HealthResponse {
+        status: "ok",
+        version: env!("CARGO_PKG_VERSION"),
+        timestamp: now,
+        uptime: now - start,
+    })
+}
+
+// In server.rs, add route
+// .route("/health", get(health))
+
+Testing Strategy
+rust
+
+// tests/integration_test.rs
+use myapp::{config, server};
+use reqwest::Client;
+use tokio::time::Duration;
+
+#[tokio::test]
+async fn test_create_user() {
+    // Start test server
+    let config = config::Config::test();
+    let (shutdown_tx, shutdown_rx) = tokio::sync::oneshot::channel();
+    
+    let server_handle = tokio::spawn(async {
+        server::run(config).await.unwrap();
+    });
+    
+    // Wait for server to start
+    tokio::time::sleep(Duration::from_millis(100)).await;
+    
+    // Make request
+    let client = Client::new();
+    let response = client
+        .post("http://localhost:8080/users")
+        .json(&serde_json::json!({
+            "name": "Test User",
+            "email": "test@example.com"
+        }))
+        .send()
+        .await
+        .unwrap();
+    
+    assert_eq!(response.status(), 201);
+    
+    // Shutdown server
+    shutdown_tx.send(()).unwrap();
+    server_handle.await.unwrap();
+}
+
+📊 PHASE 7 COMPLETE - DECISION MATRIX
+When to Apply Each Practice
+Concern	Practice	When to Apply
+Naming	snake_case, UpperCamelCase	Always
+Errors	Custom error types	Libraries
+Errors	anyhow	Applications
+Logging	tracing	Async apps
+Logging	log	Simple apps
+Testing	Unit tests	Functions
+Testing	Integration tests	Public APIs
+Profiling	Criterion	Performance-critical
+Memory	Cow, smallvec	When allocations matter
+Async	Tokio	I/O-bound
+Async	spawn_blocking	CPU-bound
+Config	Environment variables	Production
+Config	Config files	Complex setups
+Quick Reference Card
+bash
+
+# Development Commands
+cargo new my_project          # Create new project
+cargo build                   # Build project
+cargo run                     # Run project
+cargo test                    # Run tests
+cargo bench                   # Run benchmarks
+cargo doc --open              # Generate documentation
+
+# Quality Tools
+cargo fmt                     # Format code
+cargo clippy                  # Lint code
+cargo audit                   # Check vulnerabilities
+cargo outdated                # Check outdated deps
+cargo bloat                   # Check binary size
+cargo geiger                  # Check unsafe code
+
+# Performance Tools
+cargo flamegraph              # Generate flamegraph
+cargo bench                   # Run benchmarks
+cargo bench -- --save-baseline before  # Baseline
+cargo bench -- --baseline before        # Compare
+
+# Publishing
+cargo publish --dry-run       # Check before publish
+cargo publish                 # Publish to crates.io
+cargo yank --vers 0.1.0       # Yank version
+
+# Environment
+RUST_LOG=debug cargo run      # Debug logging
+RUST_BACKTRACE=1 cargo run    # Backtrace on panic
+RUSTFLAGS="-C target-cpu=native" cargo build  # CPU optimizations
+
+🎯 PHASE 7 COMPLETE - ACHIEVEMENT SUMMARY
+What You've Achieved
+Topic	Skills Acquired
+Best Practices	Idiomatic Rust, naming conventions, error handling patterns, logging strategies
+Code Organization	Module structure, workspace management, separation of concerns, feature flags
+Performance	Profiling with Criterion, flamegraphs, memory optimization, compiler flags
+Architecture	Layered design, configuration management, graceful shutdown, testing strategies
+🚀 What You Can Now Build
+
+    Production web services with proper error handling, logging, and metrics
+
+    CLI tools with ergonomic interfaces and good performance
+
+    Libraries with clean APIs, comprehensive documentation, and semver compliance
+
+    Large-scale applications with modular architecture and team collaboration
+
+    Performance-critical systems with profiling and optimization
+
+    Published crates with professional documentation and CI/CD
+
+🎉 Congratulations! You've Completed All 7 Phases! 🎉
+
+You have now mastered Rust from basics to production-ready applications. You understand:
+
+    Foundations: Variables, control flow, ownership, lifetimes
+
+    Data Structures: Vectors, HashMaps, Strings, custom collections
+
+    Traits & Type System: Generics, associated types, trait objects
+
+    Concurrency: Threads, channels, Mutex, Arc, async programming
+
+    Advanced Rust: Macros, build scripts, testing, documentation
+
+    Production: Best practices, organization, performance, architecture
+
+What's Next?
+
+    Contribute to open source Rust projects (tokio, axum, serde, etc.)
+
+    Build your own libraries and publish to crates.io
+
+    Explore advanced domains: embedded Rust, WebAssembly, blockchain
+
+    Join the Rust community: users.rust-lang.org, Discord, r/rust
+
+    Read advanced books: "Rust for Rustaceans", "Programming Rust"
+
+Thank you for completing this journey! 🦀🚀
