@@ -1,48 +1,63 @@
-# 🦀 PHASE 1: BASICS (FOUNDATIONS) - COMPLETE DETAILED CHEAT SHEET
+🦀 PHASE 1: BASICS (FOUNDATIONS) - COMPLETE DETAILED CHEAT SHEET
+Table of Contents
 
-## Table of Contents
+    Introduction to Rust
 
-1. Introduction to Rust
-2. Setting up Rust Environment
-3. Variables and Data Types
-4. Operators
-5. Control Flow
-6. Pattern Matching (match)
-7. Functions
-8. Arrays and Tuples
-9. Strings
-10. Slices
-11. Structs
-12. Enums
+    Setting up Rust Environment
 
----
+    Variables and Data Types
 
-## 1️⃣ INTRODUCTION TO RUST
+    Operators
 
-### 📖 What is it?
+    Control Flow
+
+    Pattern Matching (match)
+
+    Functions
+
+    Arrays and Tuples
+
+    Strings
+
+    Slices
+
+    Structs
+
+    Enums
+
+1️⃣ INTRODUCTION TO RUST
+📖 What is it?
 
 Rust is a systems programming language that provides memory safety without garbage collection. It was created by Graydon Hoare at Mozilla and first released in 2015. Rust guarantees memory safety through its ownership system, which is checked at compile time.
+🎯 When to Use Rust
 
-### 🎯 When to Use Rust
+    Systems programming: Operating systems, device drivers, embedded systems
 
-- **Systems programming**: Operating systems, device drivers, embedded systems
-- **Web backends**: High-performance web services and APIs
-- **Blockchain**: Smart contracts, blockchain nodes (Solana, Polkadot)
-- **Game development**: Game engines, performance-critical game logic
-- **CLI tools**: Fast, reliable command-line applications
-- **WebAssembly**: Compiling to WASM for web applications
+    Web backends: High-performance web services and APIs
 
-### 💡 Why Use Rust
+    Blockchain: Smart contracts, blockchain nodes (Solana, Polkadot)
 
-- **Memory safety**: No null pointer dereferences, no buffer overflows, no use-after-free
-- **Performance**: Zero-cost abstractions, no garbage collector overhead
-- **Concurrency**: Fearless concurrency with compile-time guarantees against data races
-- **Productivity**: Rich type system, excellent tooling, great error messages
-- **Ecosystem**: Growing library ecosystem, active community
+    Game development: Game engines, performance-critical game logic
 
-### 📝 Key Concepts
+    CLI tools: Fast, reliable command-line applications
 
-```rust
+    WebAssembly: Compiling to WASM for web applications
+
+💡 Why Use Rust
+
+    Memory safety: No null pointer dereferences, no buffer overflows, no use-after-free
+
+    Performance: Zero-cost abstractions, no garbage collector overhead
+
+    Concurrency: Fearless concurrency with compile-time guarantees against data races
+
+    Productivity: Rich type system, excellent tooling, great error messages
+
+    Ecosystem: Growing library ecosystem, active community
+
+📝 Key Concepts
+rust
+
 // Rust focuses on three pillars:
 // 1. Safety - No segfaults, no data races
 // 2. Speed - Zero-cost abstractions
@@ -52,41 +67,46 @@ Rust is a systems programming language that provides memory safety without garba
 fn main() {
     println!("Hello, Rust!");
 }
-```
 
-### 🏆 Companies Using Rust
+🏆 Companies Using Rust
 
-- **Mozilla**: Servo browser engine, Firefox components
-- **Microsoft**: Azure IoT Edge, Windows components
-- **Amazon**: AWS Lambda, Firecracker microVM
-- **Google**: Android (parts), Fuchsia OS
-- **Dropbox**: File storage infrastructure
-- **Cloudflare**: Networking infrastructure
+    Mozilla: Servo browser engine, Firefox components
 
----
+    Microsoft: Azure IoT Edge, Windows components
 
-## 2️⃣ SETTING UP RUST ENVIRONMENT
+    Amazon: AWS Lambda, Firecracker microVM
 
-### 📖 What is it?
+    Google: Android (parts), Fuchsia OS
+
+    Dropbox: File storage infrastructure
+
+    Cloudflare: Networking infrastructure
+
+2️⃣ SETTING UP RUST ENVIRONMENT
+📖 What is it?
 
 Rust's toolchain is managed by rustup, which handles installation of the Rust compiler (rustc), package manager (cargo), and toolchains. Cargo is Rust's build system and package manager.
+🎯 When to Set Up
 
-### 🎯 When to Set Up
+    First installation: When starting Rust development
 
-- **First installation**: When starting Rust development
-- **Updating**: Regularly to get new features and fixes
-- **Toolchain management**: When working on projects with different Rust versions
+    Updating: Regularly to get new features and fixes
 
-### 💡 Why Use rustup and Cargo
+    Toolchain management: When working on projects with different Rust versions
 
-- **Standardization**: One toolchain for all Rust projects
-- **Version management**: Switch between stable, beta, and nightly toolchains
-- **Dependencies**: Easy addition of external crates
-- **Build automation**: Consistent build process across projects
+💡 Why Use rustup and Cargo
 
-### 📝 Complete Setup Reference
+    Standardization: One toolchain for all Rust projects
 
-```bash
+    Version management: Switch between stable, beta, and nightly toolchains
+
+    Dependencies: Easy addition of external crates
+
+    Build automation: Consistent build process across projects
+
+📝 Complete Setup Reference
+bash
+
 # Install Rust (Unix/Linux/macOS)
 curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
@@ -109,11 +129,10 @@ rustup component add rust-analyzer # IDE support
 rustup default stable
 rustup default nightly
 rustup target add wasm32-unknown-unknown  # Add WebAssembly target
-```
 
-#### Cargo Commands Reference
+📝 Cargo Commands Reference
+bash
 
-```bash
 # Create new project
 cargo new my_project              # Binary crate
 cargo new --lib my_lib            # Library crate
@@ -152,11 +171,10 @@ cargo fmt -- --check              # Check formatting
 # Linting
 cargo clippy                      # Run linter
 cargo clippy -- -W clippy::pedantic  # Stricter linting
-```
 
-#### Project Structure
+📝 Project Structure
+text
 
-```
 my_project/
 ├── Cargo.toml           # Project metadata and dependencies
 ├── Cargo.lock           # Lockfile (generated)
@@ -170,11 +188,10 @@ my_project/
 ├── examples/            # Example code
 │   └── basic.rs
 └── target/              # Compiled artifacts (generated)
-```
 
-#### Cargo.toml Reference
+📝 Cargo.toml Reference
+toml
 
-```toml
 [package]
 name = "my_project"
 version = "0.1.0"
@@ -200,35 +217,35 @@ async = ["tokio"]
 [profile.release]
 opt-level = 3
 lto = true
-```
 
----
-
-## 3️⃣ VARIABLES AND DATA TYPES
-
-### 📖 What is it?
+3️⃣ VARIABLES AND DATA TYPES
+📖 What is it?
 
 Variables in Rust are immutable by default. This is a key design choice that prevents accidental mutation and enables compiler optimizations. Data types are either scalar (single value) or compound (multiple values).
+🎯 When to Use
 
-### 🎯 When to Use
+    let: For declaring variables (immutable by default)
 
-- **let**: For declaring variables (immutable by default)
-- **mut**: When you need to modify a variable after declaration
-- **const**: For compile-time constants that never change
-- **Shadowing**: When you want to reuse variable names with different types or values
+    mut: When you need to modify a variable after declaration
 
-### 💡 Why Immutable by Default
+    const: For compile-time constants that never change
 
-- **Safety**: Prevents accidental modification
-- **Optimization**: Compiler can make stronger assumptions
-- **Clarity**: Code is easier to reason about
-- **Concurrency**: Eliminates data races
+    Shadowing: When you want to reuse variable names with different types or values
 
-### 📝 Complete Methods Reference
+💡 Why Immutable by Default
 
-#### Variable Declaration
+    Safety: Prevents accidental modification
 
-```rust
+    Optimization: Compiler can make stronger assumptions
+
+    Clarity: Code is easier to reason about
+
+    Concurrency: Eliminates data races
+
+📝 Complete Methods Reference
+Variable Declaration
+rust
+
 // Why immutable by default: Prevents accidental mutation
 // When: Most variable declarations
 fn variable_examples() {
@@ -247,11 +264,10 @@ fn variable_examples() {
     // Multiple declarations
     let (a, b) = (1, 2);
 }
-```
 
-#### Shadowing
+Shadowing
+rust
 
-```rust
 // Why shadowing: Reuse variable names without mutation
 // When: Transforming values, changing types
 fn shadowing_examples() {
@@ -272,11 +288,10 @@ fn shadowing_examples() {
     // Shadowing allows different type
     let count = "six";  // Now count is &str
 }
-```
 
-#### Scalar Types
+Scalar Types
+rust
 
-```rust
 // Why scalar types: Single-value types for basic data
 // When: Representing simple values like numbers, booleans, characters
 
@@ -315,11 +330,10 @@ fn scalar_types() {
     let heart = '❤';        // Emoji
     let chinese = '中';       // Chinese character
 }
-```
 
-#### Compound Types
+Compound Types
+rust
 
-```rust
 // Why compound types: Group multiple values together
 // When: Storing related data, returning multiple values
 
@@ -349,11 +363,10 @@ fn compound_types() {
     // Array with repeated values
     let zeros = [0; 10];      // [0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use let for immutable by default
 let name = "Alice";
 
@@ -377,35 +390,35 @@ let million = 1_000_000;
 
 // 7. Use descriptive variable names
 let user_name = "Alice";  // Not let un = "Alice"
-```
 
----
-
-## 4️⃣ OPERATORS
-
-### 📖 What is it?
+4️⃣ OPERATORS
+📖 What is it?
 
 Operators in Rust allow you to perform arithmetic, comparison, logical, and bitwise operations. Rust has the same operators as C/C++ but with some Rust-specific behaviors.
+🎯 When to Use
 
-### 🎯 When to Use
+    Arithmetic: For mathematical calculations
 
-- **Arithmetic**: For mathematical calculations
-- **Comparison**: For decision-making and sorting
-- **Logical**: For combining boolean conditions
-- **Bitwise**: For low-level operations, flags, embedded systems
+    Comparison: For decision-making and sorting
 
-### 💡 Why Operators Matter
+    Logical: For combining boolean conditions
 
-- **Expressiveness**: Write concise, readable code
-- **Performance**: Compile to efficient machine code
-- **Safety**: Overflow checking in debug builds
-- **Consistency**: Familiar syntax from other languages
+    Bitwise: For low-level operations, flags, embedded systems
 
-### 📝 Complete Methods Reference
+💡 Why Operators Matter
 
-#### Arithmetic Operators
+    Expressiveness: Write concise, readable code
 
-```rust
+    Performance: Compile to efficient machine code
+
+    Safety: Overflow checking in debug builds
+
+    Consistency: Familiar syntax from other languages
+
+📝 Complete Methods Reference
+Arithmetic Operators
+rust
+
 // Why arithmetic: Perform mathematical calculations
 // When: Number manipulation, calculations
 
@@ -436,11 +449,10 @@ fn arithmetic_operators() {
     count /= 4;              // count = 6
     count %= 4;              // count = 2
 }
-```
 
-#### Comparison Operators
+Comparison Operators
+rust
 
-```rust
 // Why comparison: Make decisions based on values
 // When: Conditional logic, sorting, validation
 
@@ -465,11 +477,10 @@ fn comparison_operators() {
     // let equal = x == y;      // ❌ Can't compare i32 and f64
     let equal = (x as f64) == y; // ✅ Type conversion
 }
-```
 
-#### Logical Operators
+Logical Operators
+rust
 
-```rust
 // Why logical: Combine boolean conditions
 // When: Complex conditional logic
 
@@ -496,11 +507,10 @@ fn logical_operators() {
         println!("Access denied");
     }
 }
-```
 
-#### Bitwise Operators
+Bitwise Operators
+rust
 
-```rust
 // Why bitwise: Low-level flag manipulation
 // When: Systems programming, embedded, permissions, flags
 
@@ -532,11 +542,10 @@ fn bitwise_operators() {
         println!("Can write");
     }
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use integer division carefully (truncates)
 let result = 5 / 2;  // 2, not 2.5
 
@@ -557,35 +566,35 @@ if cheap_check() && expensive_check() { }  // Short-circuits
 let result = 255u8.checked_add(1);  // Some(256) or None for overflow
 let result = 255u8.saturating_add(1);  // 255 (saturates)
 let result = 255u8.wrapping_add(1);  // 0 (wraps around)
-```
 
----
-
-## 5️⃣ CONTROL FLOW
-
-### 📖 What is it?
+5️⃣ CONTROL FLOW
+📖 What is it?
 
 Control flow statements determine the order in which code executes. Rust provides if expressions, loops (loop, while, for), and pattern matching.
+🎯 When to Use
 
-### 🎯 When to Use
+    if/else: Conditional branching
 
-- **if/else**: Conditional branching
-- **loop**: Infinite loops with explicit breaks
-- **while**: Condition-based loops
-- **for**: Iterating over collections and ranges
+    loop: Infinite loops with explicit breaks
 
-### 💡 Why Rust's Control Flow is Special
+    while: Condition-based loops
 
-- **if is an expression**: Returns values
-- **loop can return values**: break value pattern
-- **for is the most common**: Safe iteration over collections
-- **Pattern matching**: Powerful match for control flow
+    for: Iterating over collections and ranges
 
-### 📝 Complete Methods Reference
+💡 Why Rust's Control Flow is Special
 
-#### If Expression
+    if is an expression: Returns values
 
-```rust
+    loop can return values: break value pattern
+
+    for is the most common: Safe iteration over collections
+
+    Pattern matching: Powerful match for control flow
+
+📝 Complete Methods Reference
+If Expression
+rust
+
 // Why if: Conditional execution
 // When: Making decisions based on conditions
 
@@ -630,11 +639,10 @@ fn if_expressions() {
     // Using if in let binding
     let threshold = if number > 10 { 100 } else { 50 };
 }
-```
 
-#### Loop (Infinite)
+Loop (Infinite)
+rust
 
-```rust
 // Why loop: Repeat indefinitely until break
 // When: Polling, event loops, retry mechanisms
 
@@ -688,11 +696,10 @@ fn loop_examples() {
         }
     }
 }
-```
 
-#### While Loop
+While Loop
+rust
 
-```rust
 // Why while: Loop while condition is true
 // When: Unknown number of iterations, condition-based loops
 
@@ -720,11 +727,10 @@ fn while_examples() {
         println!("Popped: {}", value);
     }
 }
-```
 
-#### For Loop
+For Loop
+rust
 
-```rust
 // Why for: Iterate over collections and ranges
 // When: Most common loop for iterating
 
@@ -781,11 +787,10 @@ fn for_examples() {
     }
     // println!("{:?}", vec);  // ❌ vec moved
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use if as expression for concise code
 let status = if is_valid { "ok" } else { "error" };
 
@@ -810,35 +815,35 @@ for item in vec { }       // Consumes
 
 // 6. Use enumerate for indices
 for (i, item) in list.iter().enumerate() { }
-```
 
----
-
-## 6️⃣ PATTERN MATCHING (match)
-
-### 📖 What is it?
+6️⃣ PATTERN MATCHING (match)
+📖 What is it?
 
 match is Rust's most powerful control flow construct. It allows you to compare a value against a series of patterns and execute code based on which pattern matches.
+🎯 When to Use
 
-### 🎯 When to Use
+    Exhaustive handling: When all possibilities must be handled
 
-- **Exhaustive handling**: When all possibilities must be handled
-- **Enum matching**: Primary way to work with enums
-- **Destructuring**: Extract values from complex types
-- **Fallback**: Use _ for default cases
+    Enum matching: Primary way to work with enums
 
-### 💡 Why Match is Powerful
+    Destructuring: Extract values from complex types
 
-- **Exhaustiveness**: Compiler ensures all cases are handled
-- **Pattern destructuring**: Extract values in one step
-- **Match guards**: Add additional conditions
-- **Value returning**: match is an expression
+    Fallback: Use _ for default cases
 
-### 📝 Complete Methods Reference
+💡 Why Match is Powerful
 
-#### Basic Match
+    Exhaustiveness: Compiler ensures all cases are handled
 
-```rust
+    Pattern destructuring: Extract values in one step
+
+    Match guards: Add additional conditions
+
+    Value returning: match is an expression
+
+📝 Complete Methods Reference
+Basic Match
+rust
+
 // Why match: Handle multiple cases exhaustively
 // When: Working with enums, options, results
 
@@ -852,11 +857,10 @@ fn basic_match() {
         _ => println!("Other number"),  // Catch-all
     }
 }
-```
 
-#### Pattern Types
+Pattern Types
+rust
 
-```rust
 fn pattern_types() {
     // Matching multiple values
     let number = 2;
@@ -894,11 +898,10 @@ fn pattern_types() {
         Person { name, .. } => println!("{}", name),
     }
 }
-```
 
-#### Match Guards
+Match Guards
+rust
 
-```rust
 // Why guards: Add extra conditions to patterns
 // When: Complex matching logic
 
@@ -921,11 +924,10 @@ fn match_guards() {
         _ => println!("x out of range"),
     }
 }
-```
 
-#### Match as Expression
+Match as Expression
+rust
 
-```rust
 // Why match as expression: Return values
 // When: Need to compute value based on pattern
 
@@ -946,11 +948,10 @@ fn match_expression() {
         Err(e) => format!("Failed: {}", e),
     };
 }
-```
 
-#### If Let
+If Let
+rust
 
-```rust
 // Why if let: Concise single-pattern matching
 // When: Only care about one pattern, ignore others
 
@@ -980,11 +981,10 @@ fn if_let_examples() {
         println!("Both have values: {} and {}", x, y);
     }
 }
-```
 
-#### While Let
+While Let
+rust
 
-```rust
 // Why while let: Loop while pattern matches
 // When: Iterating until pattern no longer matches
 
@@ -1012,11 +1012,10 @@ fn while_let_examples() {
         }
     }
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Always handle all cases (use _ for default)
 match value {
     Pattern1 => { },
@@ -1048,34 +1047,33 @@ match optional {
     Some(x) => process(x),
     None => handle_missing(),
 }
-```
 
----
-
-## 7️⃣ FUNCTIONS
-
-### 📖 What is it?
+7️⃣ FUNCTIONS
+📖 What is it?
 
 Functions are reusable blocks of code. Rust functions have explicit parameter types, return types, and are defined with fn. The last expression in a function is implicitly returned.
+🎯 When to Use
 
-### 🎯 When to Use
+    Code organization: Group related code together
 
-- **Code organization**: Group related code together
-- **Reusability**: Call same code from multiple places
-- **Abstraction**: Hide implementation details
-- **Testing**: Isolate logic for testing
+    Reusability: Call same code from multiple places
 
-### 💡 Why Rust Functions are Special
+    Abstraction: Hide implementation details
 
-- **Expression-based**: Last expression is return value
-- **Type inference**: Return type is explicit, but often inferred
-- **Ownership**: Clear rules about ownership transfer
+    Testing: Isolate logic for testing
 
-### 📝 Complete Methods Reference
+💡 Why Rust Functions are Special
 
-#### Basic Functions
+    Expression-based: Last expression is return value
 
-```rust
+    Type inference: Return type is explicit, but often inferred
+
+    Ownership: Clear rules about ownership transfer
+
+📝 Complete Methods Reference
+Basic Functions
+rust
+
 // Why functions: Reusable code blocks
 // When: Organizing code, avoiding duplication
 
@@ -1121,11 +1119,10 @@ fn basic_function_examples() {
     let (q, r) = divide(10.0, 3.0);
     println!("Quotient: {}, Remainder: {}", q, r);
 }
-```
 
-#### Expression vs Statement
+Expression vs Statement
+rust
 
-```rust
 // Why expressions: They return values
 // Why statements: They perform actions
 
@@ -1151,11 +1148,10 @@ fn expression_vs_statement() {
         x * x;  // ❌ Returns (), not i32
     }
 }
-```
 
-#### Function Ownership
+Function Ownership
+rust
 
-```rust
 // Why ownership: Determines how data is transferred
 // When: Understanding how values are moved or borrowed
 
@@ -1204,11 +1200,10 @@ fn give_ownership() -> String {
 fn take_and_give_back(s: String) -> String {
     s  // Ownership moves back
 }
-```
 
-#### Higher-Order Functions
+Higher-Order Functions
+rust
 
-```rust
 // Why higher-order: Functions as values
 // When: Functional programming patterns
 
@@ -1237,11 +1232,10 @@ fn higher_order_functions() {
     let multiply = |x| x * factor;  // Captures factor
     println!("{}", multiply(10));  // 30
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use explicit return types
 fn calculate() -> i32 {  // Always specify return type
     42
@@ -1276,32 +1270,29 @@ fn do_something() { }  // Returns ()
 fn add(a: i32, b: i32) -> i32 {
     a + b
 }
-```
 
----
-
-## 8️⃣ ARRAYS AND TUPLES
-
-### 📖 What is it?
+8️⃣ ARRAYS AND TUPLES
+📖 What is it?
 
 Arrays and tuples are compound types that group multiple values. Arrays store same-type values with fixed length. Tuples store possibly different types with fixed length.
+🎯 When to Use
 
-### 🎯 When to Use
+    Arrays: Same-type data, fixed size, performance-critical
 
-- **Arrays**: Same-type data, fixed size, performance-critical
-- **Tuples**: Different-type data, returning multiple values, small data groups
+    Tuples: Different-type data, returning multiple values, small data groups
 
-### 💡 Why Use Arrays and Tuples
+💡 Why Use Arrays and Tuples
 
-- **Stack allocation**: Fast (no heap allocation)
-- **Fixed size**: Known at compile time
-- **Memory efficient**: No overhead
+    Stack allocation: Fast (no heap allocation)
 
-### 📝 Complete Methods Reference
+    Fixed size: Known at compile time
 
-#### Arrays
+    Memory efficient: No overhead
 
-```rust
+📝 Complete Methods Reference
+Arrays
+rust
+
 // Why arrays: Fixed-size, same-type collections
 // When: Known size at compile time, performance matters
 
@@ -1351,11 +1342,10 @@ fn array_examples() {
     ];
     let center = matrix[1][1];  // 5
 }
-```
 
-#### Tuples
+Tuples
+rust
 
-```rust
 // Why tuples: Group different types
 // When: Returning multiple values, temporary grouping
 
@@ -1397,11 +1387,10 @@ fn tuple_examples() {
     let red = Color(255, 0, 0);
     let r = red.0;  // 255
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use arrays for fixed-size same-type data
 let days = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -1419,32 +1408,29 @@ let coords = [0; 3];  // Better than Vec::new()
 
 // 6. Use tuple structs for named tuples
 struct Point(i32, i32);  // More semantic than (i32, i32)
-```
 
----
-
-## 9️⃣ STRINGS
-
-### 📖 What is it?
+9️⃣ STRINGS
+📖 What is it?
 
 Rust has two string types: String (owned, heap-allocated, mutable) and &str (borrowed, immutable view). Strings are UTF-8 encoded.
+🎯 When to Use
 
-### 🎯 When to Use
+    String: When you own the data and need to modify it
 
-- **String**: When you own the data and need to modify it
-- **&str**: For function parameters, string literals, borrowed views
+    &str: For function parameters, string literals, borrowed views
 
-### 💡 Why Two String Types
+💡 Why Two String Types
 
-- **Efficiency**: &str allows borrowing without allocation
-- **Safety**: UTF-8 ensures valid Unicode
-- **Ownership**: Clear distinction between owned and borrowed
+    Efficiency: &str allows borrowing without allocation
 
-### 📝 Complete Methods Reference
+    Safety: UTF-8 ensures valid Unicode
 
-#### Creating Strings
+    Ownership: Clear distinction between owned and borrowed
 
-```rust
+📝 Complete Methods Reference
+Creating Strings
+rust
+
 // Why String: Owned, mutable string data
 // When: Need to modify or own string data
 
@@ -1472,11 +1458,10 @@ fn string_creation() {
     let mut s = String::with_capacity(100);
     println!("Capacity: {}", s.capacity());
 }
-```
 
-#### String Manipulation
+String Manipulation
+rust
 
-```rust
 // Why manipulation: Modify string content
 // When: Building strings, appending, inserting
 
@@ -1506,11 +1491,10 @@ fn string_manipulation() {
     let upper = s.to_uppercase();
     let lower = s.to_lowercase();
 }
-```
 
-#### String Access
+String Access
+rust
 
-```rust
 // Why access: Read string content
 // When: Need to examine string data
 
@@ -1551,11 +1535,10 @@ fn string_access() {
         println!("First 5 bytes: {}", slice);  // "Hello"
     }
 }
-```
 
-#### Searching and Splitting
+Searching and Splitting
+rust
 
-```rust
 // Why searching: Find content in strings
 // Why splitting: Break strings into parts
 
@@ -1598,11 +1581,10 @@ fn string_search_split() {
         println!("{}", line);
     }
 }
-```
 
-#### Concatenation and Formatting
+Concatenation and Formatting
+rust
 
-```rust
 // Why concatenation: Combine strings
 // Why formatting: Build strings with variables
 
@@ -1655,11 +1637,10 @@ fn string_concatenation() {
         age = 30
     );
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use &str for function parameters
 fn process(text: &str) {  // Accepts both String and &str
     println!("{}", text);
@@ -1684,33 +1665,31 @@ for c in s.chars() { }  // Iterate over characters, not bytes
 // 6. Avoid indexing strings
 // ❌ let c = s[0];  // Won't compile
 // ✅ let c = s.chars().next();  // Safe
-```
 
----
-
-## 🔟 SLICES
-
-### 📖 What is it?
+🔟 SLICES
+📖 What is it?
 
 Slices are views into collections (arrays, vectors, strings). They reference a contiguous sequence of elements without taking ownership.
+🎯 When to Use
 
-### 🎯 When to Use
+    String slices: Efficient string processing
 
-- **String slices**: Efficient string processing
-- **Array/vector slices**: Working with portions of collections
-- **Function parameters**: Accept any array/vector without generics
+    Array/vector slices: Working with portions of collections
 
-### 💡 Why Use Slices
+    Function parameters: Accept any array/vector without generics
 
-- **No ownership**: Borrowed view, no allocation
-- **Safety**: Bounds checked at runtime
-- **Flexibility**: Works with arrays, vectors, and other slices
+💡 Why Use Slices
 
-### 📝 Complete Methods Reference
+    No ownership: Borrowed view, no allocation
 
-#### String Slices
+    Safety: Bounds checked at runtime
 
-```rust
+    Flexibility: Works with arrays, vectors, and other slices
+
+📝 Complete Methods Reference
+String Slices
+rust
+
 // Why string slices: Borrowed view of string data
 // When: Processing parts of strings
 
@@ -1743,11 +1722,10 @@ fn string_slices() {
     let first_char = cyrillic.chars().next().unwrap();
     let first_five: String = cyrillic.chars().take(5).collect();
 }
-```
 
-#### Array Slices
+Array Slices
+rust
 
-```rust
 // Why array slices: Borrowed view of array data
 // When: Working with parts of arrays
 
@@ -1773,11 +1751,10 @@ fn array_slices() {
     slice[2] = 40;
     println!("Modified arr: {:?}", arr);  // [1, 20, 30, 40, 5]
 }
-```
 
-#### Functions with Slices
+Functions with Slices
+rust
 
-```rust
 // Why slice parameters: Accept both arrays and vectors
 // When: Functions that don't need ownership
 
@@ -1811,11 +1788,10 @@ fn slice_functions() {
     let word = first_word(&s);
     println!("First word: {}", word);
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use &str for string function parameters
 fn process_string(text: &str) { }
 
@@ -1835,34 +1811,33 @@ struct Text<'a> {
 
 // 6. Use get for safe slicing
 if let Some(slice) = text.get(0..5) { }
-```
 
----
-
-## 1️⃣1️⃣ STRUCTS
-
-### 📖 What is it?
+1️⃣1️⃣ STRUCTS
+📖 What is it?
 
 Structs are custom data types that group related data together. They are the foundation of data modeling in Rust.
+🎯 When to Use
 
-### 🎯 When to Use
+    Data modeling: Represent real-world entities
 
-- **Data modeling**: Represent real-world entities
-- **Encapsulation**: Group related fields
-- **Methods**: Attach behavior to data
+    Encapsulation: Group related fields
 
-### 💡 Why Use Structs
+    Methods: Attach behavior to data
 
-- **Organization**: Group related data
-- **Type safety**: Create meaningful types
-- **Methods**: Attach behavior to data
-- **Pattern matching**: Destructure fields
+💡 Why Use Structs
 
-### 📝 Complete Methods Reference
+    Organization: Group related data
 
-#### Defining Structs
+    Type safety: Create meaningful types
 
-```rust
+    Methods: Attach behavior to data
+
+    Pattern matching: Destructure fields
+
+📝 Complete Methods Reference
+Defining Structs
+rust
+
 // Why structs: Custom data types
 // When: Grouping related data
 
@@ -1903,11 +1878,10 @@ fn struct_definition() {
     // Unit struct
     let empty = Empty;
 }
-```
 
-#### Field Init Shorthand
+Field Init Shorthand
+rust
 
-```rust
 // Why shorthand: Reduce boilerplate
 // When: Field names match variable names
 
@@ -1931,11 +1905,10 @@ fn field_init_shorthand() {
         active: true,
     };
 }
-```
 
-#### Struct Update Syntax
+Struct Update Syntax
+rust
 
-```rust
 // Why update syntax: Create new struct from existing
 // When: Modifying a few fields while keeping others
 
@@ -1965,11 +1938,10 @@ fn struct_update() {
     // Note: user1 is moved if fields aren't Copy
     // user1.email and user1.username moved, but age and active are Copy
 }
-```
 
-#### Mutable Structs
+Mutable Structs
+rust
 
-```rust
 // Why mutable structs: Allow field modification
 // When: Struct fields need to change
 
@@ -1988,11 +1960,10 @@ fn mutable_structs() {
     // Entire struct must be mutable (no per-field mutability)
     // user.username = String::from("new");  // Works because user is mut
 }
-```
 
-#### Methods and Associated Functions
+Methods and Associated Functions
+rust
 
-```rust
 // Why methods: Attach behavior to structs
 // Why associated functions: Constructors, utility functions
 
@@ -2060,11 +2031,10 @@ fn methods_example() {
     let tuple = rect.into_tuple();
     // println!("{}", rect.area());  // ❌ rect moved
 }
-```
 
-#### Multiple Impl Blocks
+Multiple Impl Blocks
+rust
 
-```rust
 // Why multiple impl blocks: Organize methods
 // When: Separate concerns, implement traits
 
@@ -2102,11 +2072,10 @@ impl Point {
         format!("({}, {})", self.x, self.y)
     }
 }
-```
 
-#### Debug Printing
+Debug Printing
+rust
 
-```rust
 // Why Debug: Print structs for debugging
 // When: Need to inspect struct values
 
@@ -2137,11 +2106,10 @@ struct Config {
     host: String,
     port: u16,
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use structs for data modeling
 struct User { name: String, age: u32 }
 
@@ -2177,35 +2145,35 @@ struct UserSettings { }
 
 // Bad
 struct User { profile: ..., settings: ..., permissions: ... }
-```
 
----
-
-## 1️⃣2️⃣ ENUMS
-
-### 📖 What is it?
+1️⃣2️⃣ ENUMS
+📖 What is it?
 
 Enums allow you to define a type that can be one of several variants. Each variant can optionally hold data, making enums extremely powerful for representing state.
+🎯 When to Use
 
-### 🎯 When to Use
+    State machines: Represent different states with associated data
 
-- **State machines**: Represent different states with associated data
-- **Option types**: Values that may be absent
-- **Error handling**: Represent different error types
-- **Algebraic data types**: Powerful data modeling
+    Option types: Values that may be absent
 
-### 💡 Why Use Enums
+    Error handling: Represent different error types
 
-- **Expressiveness**: Model domain precisely
-- **Safety**: Compiler checks all cases
-- **Flexibility**: Each variant can have different data
-- **Pattern matching**: Natural fit with match
+    Algebraic data types: Powerful data modeling
 
-### 📝 Complete Methods Reference
+💡 Why Use Enums
 
-#### Basic Enums
+    Expressiveness: Model domain precisely
 
-```rust
+    Safety: Compiler checks all cases
+
+    Flexibility: Each variant can have different data
+
+    Pattern matching: Natural fit with match
+
+📝 Complete Methods Reference
+Basic Enums
+rust
+
 // Why enums: Represent mutually exclusive variants
 // When: Values can be one of several types
 
@@ -2228,11 +2196,10 @@ fn basic_enum() {
         Direction::Right => println!("Moving right"),
     }
 }
-```
 
-#### Enums with Data
+Enums with Data
+rust
 
-```rust
 // Why data-carrying enums: Store data with variants
 // When: Different variants need different data
 
@@ -2269,11 +2236,10 @@ fn enums_with_data() {
         Message::ChangeColor(r, g, b) => println!("Color: ({}, {}, {})", r, g, b),
     }
 }
-```
 
-#### Option Enum (Built-in)
+Option Enum (Built-in)
+rust
 
-```rust
 // Why Option: Safe alternative to null
 // When: Values may be absent
 
@@ -2306,11 +2272,10 @@ fn option_examples() {
     let doubled = some_number.map(|x| x * 2);
     let result = some_number.and_then(|x| Some(x * 2));
 }
-```
 
-#### Result Enum (Built-in)
+Result Enum (Built-in)
+rust
 
-```rust
 // Why Result: Error handling
 // When: Operations that can fail
 
@@ -2349,11 +2314,10 @@ fn result_examples() {
         .map(|x| x * 2.0)
         .map_err(|e| format!("Error: {}", e));
 }
-```
 
-#### Enums with Methods
+Enums with Methods
+rust
 
-```rust
 // Why methods: Attach behavior to enums
 // When: Enums need associated functionality
 
@@ -2396,11 +2360,10 @@ fn enum_methods() {
     println!("{} is worth {} cents", coin.name(), coin.value_in_cents());
     println!("Plural: {}", coin.plural());
 }
-```
 
-### 🏆 Best Practices
+🏆 Best Practices
+rust
 
-```rust
 // 1. Use Option for optional values
 fn find_user(id: u32) -> Option<User> { }
 
@@ -2436,124 +2399,47 @@ match state {
     State::Inactive => { }
     // Compiler ensures all cases handled
 }
-```
 
----
+📊 PHASE 1 COMPLETE - ACHIEVEMENT SUMMARY
+What You've Achieved
+Topic	Skills Acquired
+Introduction	Understand Rust's value proposition
+Environment	Install Rust, use Cargo, project structure
+Variables	Immutability, mutability, shadowing, constants
+Data Types	Scalar types, compound types, type inference
+Operators	Arithmetic, comparison, logical, bitwise
+Control Flow	if, loop, while, for, break, continue
+Pattern Matching	match, if let, while let, destructuring
+Functions	Parameters, return values, expressions
+Arrays & Tuples	Fixed-size collections, destructuring
+Strings	String vs &str, manipulation, slicing
+Slices	Borrowed views of collections
+Structs	Data modeling, methods, associated functions
+Enums	Variants, data-carrying, Option, Result
+🚀 What You Can Now Build
 
-## 📊 PHASE 1 COMPLETE - DECISION MATRIX
+    Basic programs with variables and control flow
 
-| Topic | Use When | Best Practice |
-|-------|----------|---|
-| Variables | Declaring data | Use immutable by default |
-| Mutability | Modification needed | Use `mut` explicitly |
-| Constants | Compile-time values | Use `const` for fixed values |
-| Shadowing | Type transformation | Use for clarity, not confusion |
-| Integers | Whole numbers | Prefer `i32` as default |
-| Floats | Decimal numbers | Use `f64` by default |
-| Strings | Text data | Use `&str` for parameters, `String` for ownership |
-| Arrays | Fixed collections | Use for known size, same type |
-| Tuples | Multiple values | Use for returning multiple types |
-| Control Flow | Conditionals/loops | Use if/for/while appropriately |
-| Pattern Matching | Exhaustive cases | Use match for all possibilities |
-| Functions | Code reuse | Use for abstraction and organization |
-| Structs | Data models | Use for grouping related data |
-| Enums | State representation | Use for variants and alternatives |
+    Command-line applications using Rust
 
----
+    Data structures using structs and enums
 
-## 🎯 PHASE 1 COMPLETE - ACHIEVEMENT SUMMARY
+    Safe programs with Rust's ownership model
 
-### What You've Achieved
+    Error-handling code using Option and Result
 
-| Topic | Skills Acquired |
-|-------|---|
-| **Introduction** | Understand Rust's value proposition and use cases |
-| **Environment** | Install Rust, use Cargo, navigate project structure |
-| **Variables** | Immutability, mutability, shadowing, constants |
-| **Data Types** | Scalar types, compound types, type inference |
-| **Operators** | Arithmetic, comparison, logical, bitwise operations |
-| **Control Flow** | if/else, loop, while, for, break, continue |
-| **Pattern Matching** | match, if let, while let, destructuring |
-| **Functions** | Parameters, return values, expressions, ownership |
-| **Arrays & Tuples** | Fixed-size collections, destructuring, access |
-| **Strings** | String vs &str, manipulation, slicing, formatting |
-| **Slices** | Borrowed views, safe access, function parameters |
-| **Structs** | Data modeling, methods, associated functions |
-| **Enums** | Variants, data-carrying, Option, Result |
+🎉 Congratulations! You've Completed Phase 1! 🎉
 
-### 🚀 What You Can Now Build
+You now have a solid foundation in Rust basics. You understand:
 
-- **Basic programs** with variables and control flow
-- **Command-line applications** using Rust fundamentals
-- **Data structures** using structs and enums
-- **Safe programs** with Rust's ownership model (Phase 2 deep dive)
-- **Error-handling code** using Option and Result
-- **Functional code** with pattern matching and functions
-- **Reusable modules** with functions and types
+    Variables and data types
 
-### 💡 Core Concepts Mastered
+    Control flow and pattern matching
 
-#### 1. Immutability by Default
-- Variables are immutable unless marked `mut`
-- Prevents accidental modifications
-- Enables compiler optimizations
-- Foundation for safe concurrent code
+    Functions and modules
 
-#### 2. Type Safety
-- All types checked at compile time
-- Type inference reduces boilerplate
-- No implicit conversions between types
-- Runtime errors caught at compile time
+    Collections (arrays, tuples, strings, slices)
 
-#### 3. Pattern Matching
-- Exhaustive matching prevents bugs
-- Destructuring extracts values cleanly
-- Works with structs, enums, tuples
-- More powerful than switch statements
+    Structs and enums for data modeling
 
-#### 4. Ownership System Introduction
-- Understanding borrowing (Phase 2 deep dive)
-- Functions consume or borrow data
-- Prevents use-after-free bugs
-- Foundation for memory safety
-
-#### 5. Rust's Type System
-- Enums as "sum types" for variants
-- Structs as "product types" for composition
-- Option<T> replaces null pointers
-- Result<T, E> for error handling
-
-### ⚖️ Mastery Indicators
-
-You've mastered Phase 1 when you can:
-
-- [ ] Write Rust programs with variables, functions, and control flow
-- [ ] Understand and use both String and &str appropriately
-- [ ] Create structs and enums to model your domain
-- [ ] Write functions that take ownership, borrow, or mutate data
-- [ ] Use pattern matching with match and if let
-- [ ] Handle Option and Result types safely
-- [ ] Index and slice collections correctly
-- [ ] Use loops (for, while, loop) appropriately
-- [ ] Understand type inference and explicit types
-- [ ] Write idiomatic Rust code following best practices
-
-### 🎉 CONGRATULATIONS! YOU'VE COMPLETED PHASE 1! 🎉
-
-You now have a **solid foundation in Rust basics** covering:
-
-✅ Language fundamentals (variables, types, functions)
-✅ Control flow (if, loops, pattern matching)
-✅ Data structures (arrays, tuples, strings, structs, enums)
-✅ Code organization (functions, modules)
-✅ Error handling (Option, Result)
-✅ Type system and pattern matching
-✅ Introduction to ownership (deep dive in Phase 2)
-
-**You are ready for Phase 2: Ownership and Memory System!** 🦀🚀
-
----
-
-*Phase 1 focuses on language fundamentals. The next phase will deepen your understanding of Rust's most unique and powerful feature: the ownership system.*
-
-**Keep building, keep learning!** 🎊
+Next: Phase 2 - Ownership and Memory System 🦀🚀
